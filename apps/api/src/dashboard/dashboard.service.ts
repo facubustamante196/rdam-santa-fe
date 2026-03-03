@@ -1,0 +1,117 @@
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { SolicitudEntity } from '../database/entities';
+import { Circunscripcion, EstadoSolicitud } from '../database/enums';
+
+export interface DashboardStats {
+    solicitudes_por_estado: Record<string, number>;
+    total_solicitudes: number;
+    solicitudes_hoy: number;
+    solicitudes_por_circunscripcion: Record<string, number>;
+    tiempos_promedio: {
+        pago_dias: number | null;
+        emision_dias: number | null;
+    };
+    sla: {
+        dentro_plazo: number;
+        fuera_plazo: number;
+        porcentaje_cumplimiento: number;
+    };
+}
+
+@Injectable()
+export class DashboardService {
+    private readonly solicitudesRepository: Repository<SolicitudEntity>;
+
+    constructor(dataSource: DataSource) {
+        this.solicitudesRepository = dataSource.getRepository(SolicitudEntity);
+    }
+
+    async obtenerStats(circunscripcion?: Circunscripcion): Promise<DashboardStats> {
+        const porEstadoQb = this.solicitudesRepository.createQueryBuilder('s');
+        if (circunscripcion) {
+            porEstadoQb.where('s.circunscripcion = :circunscripcion', { circunscripcion });
+        }
+        const porEstado = await porEstadoQb
+            .select('s.estado', 'estado')
+            .addSelect('COUNT(s.id)', 'cantidad')
+            .groupBy('s.estado')
+            .getRawMany<{ estado: EstadoSolicitud; cantidad: string }>();
+
+        const solicitudes_por_estado: Record<string, number> = {};
+        let total = 0;
+        for (const item of porEstado) {
+            const cantidad = Number(item.cantidad);
+            solicitudes_por_estado[item.estado] = cantidad;
+            total += cantidad;
+        }
+        for (const estado of Object.values(EstadoSolicitud)) {
+            if (!(estado in solicitudes_por_estado)) {
+                solicitudes_por_estado[estado] = 0;
+            }
+        }
+
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        const hoyQb = this.solicitudesRepository.createQueryBuilder('s');
+        hoyQb.where('s.createdAt >= :hoy', { hoy });
+        if (circunscripcion) {
+            hoyQb.andWhere('s.circunscripcion = :circunscripcion', { circunscripcion });
+        }
+        const solicitudes_hoy = await hoyQb.getCount();
+
+        const porCircunscripcion = await this.solicitudesRepository
+            .createQueryBuilder('s')
+            .select('s.circunscripcion', 'circunscripcion')
+            .addSelect('COUNT(s.id)', 'cantidad')
+            .groupBy('s.circunscripcion')
+            .getRawMany<{ circunscripcion: Circunscripcion; cantidad: string }>();
+
+        const solicitudes_por_circunscripcion: Record<string, number> = {};
+        for (const item of porCircunscripcion) {
+            solicitudes_por_circunscripcion[item.circunscripcion] = Number(item.cantidad);
+        }
+
+        const hace48hs = new Date();
+        hace48hs.setHours(hace48hs.getHours() - 48);
+
+        const dentroQb = this.solicitudesRepository.createQueryBuilder('s');
+        dentroQb.where('s.estado = :estado', { estado: EstadoSolicitud.PAGADA });
+        dentroQb.andWhere('s.updatedAt >= :limite', { limite: hace48hs });
+        if (circunscripcion) {
+            dentroQb.andWhere('s.circunscripcion = :circunscripcion', { circunscripcion });
+        }
+
+        const fueraQb = this.solicitudesRepository.createQueryBuilder('s');
+        fueraQb.where('s.estado = :estado', { estado: EstadoSolicitud.PAGADA });
+        fueraQb.andWhere('s.updatedAt < :limite', { limite: hace48hs });
+        if (circunscripcion) {
+            fueraQb.andWhere('s.circunscripcion = :circunscripcion', { circunscripcion });
+        }
+
+        const [dentro_plazo, fuera_plazo] = await Promise.all([
+            dentroQb.getCount(),
+            fueraQb.getCount(),
+        ]);
+
+        const totalSla = dentro_plazo + fuera_plazo;
+
+        return {
+            solicitudes_por_estado,
+            total_solicitudes: total,
+            solicitudes_hoy,
+            solicitudes_por_circunscripcion,
+            tiempos_promedio: {
+                pago_dias: null,
+                emision_dias: null,
+            },
+            sla: {
+                dentro_plazo,
+                fuera_plazo,
+                porcentaje_cumplimiento:
+                    totalSla > 0 ? Math.round((dentro_plazo / totalSla) * 100) : 100,
+            },
+        };
+    }
+}

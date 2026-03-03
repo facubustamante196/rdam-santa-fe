@@ -1,0 +1,8 @@
+export enum ActorTipo {
+    CIUDADANO = 'CIUDADANO',
+    OPERARIO = 'OPERARIO',
+    SUPERVISOR = 'SUPERVISOR',
+    SISTEMA = 'SISTEMA',
+    CRON = 'CRON',
+    WEBHOOK = 'WEBHOOK',
+}

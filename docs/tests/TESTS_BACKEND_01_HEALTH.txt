@@ -1,0 +1,221 @@
+Tests Backend - [TICKET-HEALTH-001]
+Informacion General
+Ticket ID
+[TICKET-HEALTH-001]
+Desarrollador
+[QA - Codex]
+Fecha
+[2026-02-27]
+Modulo
+[Health / Monitoreo]
+Endpoint
+[GET] /health
+
+Resumen de Ejecucion
+Total de pruebas
+[12]
+
+Pasadas
+[]
+
+Fallidas
+[]
+
+
+Configuracion Postman
+Coleccion
+[RDAM API]
+Carpeta
+[Health]
+Request
+[GET Health Check]
+
+1. Casos Positivos (Happy Path)
+Test 1.1: Health check exitoso con DB y Redis disponibles
+Descripcion: Valida que el endpoint responda 200 y estructura completa cuando ambos servicios estan UP.
+Request:
+{
+  "method": "GET",
+  "url": "http://localhost:3000/health",
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}
+Response esperado:
+{
+  "status": 200,
+  "data": {
+    "status": "ok",
+    "timestamp": "ISO-8601",
+    "services": {
+      "database": { "status": "up", "latency": "number>=0" },
+      "redis": { "status": "up", "latency": "number>=0" }
+    }
+  }
+}
+Resultado
+PASS / FAIL
+Observaciones
+
+Test 1.2: Health check degradado con un servicio caido
+Descripcion: Valida que si DB o Redis falla, el endpoint sigue respondiendo 200 con estado degradado.
+Request:
+{
+  "method": "GET",
+  "url": "http://localhost:3000/health",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "precondicion": "Apagar Redis o DB antes de ejecutar"
+}
+Response esperado:
+{
+  "status": 200,
+  "data": {
+    "status": "degraded",
+    "timestamp": "ISO-8601",
+    "services": {
+      "database": { "status": "up|down", "latency": "number>=0" },
+      "redis": { "status": "up|down", "latency": "number>=0" }
+    }
+  }
+}
+Resultado
+PASS / FAIL
+Observaciones
+
+2. Casos Negativos (Validaciones)
+Test 2.1: Metodo HTTP invalido
+Descripcion: Enviar POST a un endpoint que solo acepta GET.
+Request:
+{
+  "method": "POST",
+  "url": "http://localhost:3000/health",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": {}
+}
+Response esperado:
+{
+  "status": 404,
+  "message": "Cannot POST /health"
+}
+Resultado
+PASS / FAIL
+
+Test 2.2: Ruta invalida
+Descripcion: Consumir ruta mal escrita para validar manejo de recurso inexistente.
+Request:
+{
+  "method": "GET",
+  "url": "http://localhost:3000/healt",
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}
+Response esperado:
+{
+  "status": 404,
+  "message": "Cannot GET /healt"
+}
+Resultado
+PASS / FAIL
+
+Test 2.3: Error interno no controlado (infraestructura no disponible)
+Descripcion: Simular caida de DB y Redis para validar retorno de estado down sin romper contrato.
+Response esperado:
+{
+  "status": 200,
+  "data": {
+    "status": "down",
+    "timestamp": "ISO-8601",
+    "services": {
+      "database": { "status": "down", "latency": 0 },
+      "redis": { "status": "down", "latency": 0 }
+    }
+  }
+}
+Resultado
+PASS / FAIL
+
+3. Casos de Autenticacion/Autorizacion
+Test 3.1: Sin token
+Response esperado:
+{
+  "status": 200,
+  "message": "No aplica autenticacion en /health; endpoint publico"
+}
+Resultado
+PASS / FAIL
+
+Test 3.2: Token invalido
+Response esperado:
+{
+  "status": 200,
+  "message": "No aplica autenticacion en /health; token ignorado"
+}
+Resultado
+PASS / FAIL
+
+Test 3.3: Token expirado
+Response esperado:
+{
+  "status": 200,
+  "message": "No aplica autenticacion en /health; token ignorado"
+}
+Resultado
+PASS / FAIL
+
+Test 3.4: Sin permisos
+Response esperado:
+{
+  "status": 200,
+  "message": "No aplica autorizacion por roles en /health"
+}
+Resultado
+PASS / FAIL
+
+4. Casos Limite (Edge Cases)
+Escenario
+Request/Descripcion
+Status
+Resultado
+Campos vacios
+No aplica body en GET /health
+200
+PASS/FAIL
+Valores nulos
+No aplica body en GET /health
+200
+PASS/FAIL
+String muy largo
+GET /health?probe=AAAA...(500+)
+200
+PASS/FAIL
+Inyeccion SQL/XSS
+GET /health?probe='; DROP TABLE -- <script>alert(1)</script>
+200
+PASS/FAIL
+Valor cero
+GET /health?threshold=0 (query no usada por el endpoint)
+200
+PASS/FAIL
+Valor negativo
+GET /health?threshold=-1 (query no usada por el endpoint)
+200
+PASS/FAIL
+
+Confirmacion del Desarrollador
+? Ejecute cada request en Postman personalmente
+? Verifique los responses contra los esperados
+? Las reglas de negocio del ticket estan cubiertas
+? Los casos de error estan validados
+
+Firma:
+Fecha:
+_________________
+_________________
+
+
+i2T | Tests Backend

@@ -1,0 +1,4506 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RDAM | Poder Judicial Santa Fe</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1a3a6b;
+      --primary-dark: #0f2347;
+      --primary-light: #2558a8;
+      --accent: #c8960c;
+      --accent-light: #f0b429;
+      --success: #059669;
+      --success-light: #d1fae5;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --info: #0284c7;
+      --info-light: #e0f2fe;
+      --neutral-50: #f8fafc;
+      --neutral-100: #f1f5f9;
+      --neutral-200: #e2e8f0;
+      --neutral-300: #cbd5e1;
+      --neutral-400: #94a3b8;
+      --neutral-500: #64748b;
+      --neutral-600: #475569;
+      --neutral-700: #334155;
+      --neutral-800: #1e293b;
+      --neutral-900: #0f172a;
+      --white: #ffffff;
+      --sidebar-width: 260px;
+      --header-height: 64px;
+      --devpanel-width: 320px;
+      --border-radius: 10px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--neutral-100);
+      color: var(--neutral-800);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ======== LAYOUT ======== */
+    .app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ======== SIDEBAR ======== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--primary-dark);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      padding: 20px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-brand .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .sidebar-brand .brand-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.3px;
+    }
+
+    .sidebar-brand .brand-text p {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .sidebar-section {
+      padding: 16px 12px 4px;
+    }
+
+    .sidebar-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.3);
+      padding: 0 8px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13.5px;
+      font-weight: 400;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-item:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--white);
+    }
+
+    .sidebar-item.active {
+      background: var(--primary-light);
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .sidebar-item .icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-item .badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    .user-avatar.supervisor {
+      background: var(--accent);
+    }
+
+    .user-avatar.operario {
+      background: var(--primary-light);
+    }
+
+    .user-info h4 {
+      font-size: 13px;
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .user-info p {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* ======== MAIN ======== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: var(--header-height);
+      background: var(--white);
+      border-bottom: 1px solid var(--neutral-200);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--neutral-500);
+    }
+
+    .breadcrumb span.current {
+      color: var(--neutral-800);
+      font-weight: 500;
+    }
+
+    .breadcrumb .sep {
+      color: var(--neutral-300);
+    }
+
+    .topbar-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-badge {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--neutral-100);
+      border: 1px solid var(--neutral-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .topbar-badge .dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 1.5px solid var(--white);
+    }
+
+    .page-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    /* ======== DEV PANEL ======== */
+    .dev-panel {
+      width: var(--devpanel-width);
+      background: var(--neutral-900);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--neutral-700);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .dev-panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--neutral-700);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dev-panel-header h3 {
+      color: var(--accent-light);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .dev-panel-section {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .dev-panel-section h4 {
+      color: var(--neutral-400);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .dev-note {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--neutral-300);
+      line-height: 1.6;
+    }
+
+    .dev-note .key {
+      color: var(--accent-light);
+    }
+
+    .dev-note .val {
+      color: #86efac;
+    }
+
+    .dev-note .comment {
+      color: var(--neutral-500);
+    }
+
+    .dev-note .endpoint {
+      color: #93c5fd;
+    }
+
+    .dev-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin: 2px 2px 2px 0;
+    }
+
+    .dev-tag.method-get {
+      background: #166534;
+      color: #86efac;
+    }
+
+    .dev-tag.method-post {
+      background: #1e3a8a;
+      color: #93c5fd;
+    }
+
+    .dev-tag.method-put {
+      background: #78350f;
+      color: #fcd34d;
+    }
+
+    .dev-tag.method-patch {
+      background: #4c1d95;
+      color: #c4b5fd;
+    }
+
+    /* ======== VIEWS ======== */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* ======== PORTAL VIEWS ======== */
+    .portal-wrapper {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* HOME */
+    .portal-hero {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
+      border-radius: 16px;
+      padding: 48px 40px;
+      color: var(--white);
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-hero::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      background: rgba(200, 150, 12, 0.15);
+      border-radius: 50%;
+    }
+
+    .portal-hero .shield {
+      font-size: 52px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .portal-hero h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .portal-hero p {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.75);
+      max-width: 540px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .hero-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info-card {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .info-card .ic-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .info-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neutral-800);
+      margin-bottom: 6px;
+    }
+
+    .info-card p {
+      font-size: 12px;
+      color: var(--neutral-500);
+      line-height: 1.5;
+    }
+
+    .steps-section {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .steps-section h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .steps {
+      display: flex;
+      gap: 0;
+      position: relative;
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      height: 2px;
+      background: var(--neutral-200);
+      z-index: 0;
+    }
+
+    .step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--white);
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 11px;
+      color: var(--neutral-600);
+      line-height: 1.4;
+    }
+
+    /* FORMULARIO CIUDADANO */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .form-header {
+      margin-bottom: 24px;
+    }
+
+    .form-header h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .form-header p {
+      font-size: 13px;
+      color: var(--neutral-500);
+    }
+
+    .form-section {
+      margin-bottom: 24px;
+    }
+
+    .form-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--neutral-400);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--neutral-100);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-grid.cols-1 {
+      grid-template-columns: 1fr;
+    }
+
+    .form-grid.cols-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group.span-2 {
+      grid-column: span 2;
+    }
+
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--neutral-700);
+    }
+
+    .form-label .req {
+      color: var(--danger);
+      margin-left: 2px;
+    }
+
+    .form-control {
+      border: 1.5px solid var(--neutral-200);
+      border-radius: 8px;
+      padding: 9px 13px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      color: var(--neutral-800);
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 58, 107, 0.1);
+    }
+
+    .form-control.valid {
+      border-color: var(--success);
+    }
+
+    .form-control.error {
+      border-color: var(--danger);
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--neutral-400);
+    }
+
+    .form-error {
+      font-size: 11px;
+      color: var(--danger);
+    }
+
+    .form-valid {
+      font-size: 11px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .validation-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+
+    .validation-chip.ok {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .validation-chip.warn {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .validation-chip.err {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .circ-select {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .circ-option {
+      border: 1.5px solid var(--neutral-200);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--neutral-600);
+      transition: all 0.15s;
+    }
+
+    .circ-option:hover {
+      border-color: var(--primary);
+      background: var(--neutral-50);
+    }
+
+    .circ-option.selected {
+      border-color: var(--primary);
+      background: rgba(26, 58, 107, 0.06);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .circ-option .circ-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    /* PAGO */
+    .pago-summary {
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .pago-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+
+    .pago-row.total {
+      border-top: 1.5px solid var(--neutral-300);
+      margin-top: 8px;
+      padding-top: 12px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .pago-row.total .amount {
+      color: var(--primary);
+      font-size: 22px;
+    }
+
+    .payment-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .pm-option {
+      border: 1.5px solid var(--neutral-200);
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+
+    .pm-option.selected {
+      border-color: var(--primary);
+      background: rgba(26, 58, 107, 0.04);
+    }
+
+    .pm-option .pm-icon {
+      font-size: 22px;
+    }
+
+    .pm-option .pm-label {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .pm-option .pm-sub {
+      font-size: 11px;
+      color: var(--neutral-400);
+    }
+
+    /* CONFIRMACIÃ“N */
+    .confirm-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 48px 20px;
+    }
+
+    .success-circle {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: var(--success-light);
+      border: 3px solid var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin-bottom: 24px;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.3);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .confirm-screen h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--neutral-900);
+      margin-bottom: 8px;
+    }
+
+    .confirm-screen p {
+      font-size: 14px;
+      color: var(--neutral-500);
+      max-width: 420px;
+      margin-bottom: 24px;
+    }
+
+    .tracking-box {
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-200);
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .tracking-box .label {
+      font-size: 11px;
+      color: var(--neutral-500);
+      margin-bottom: 4px;
+    }
+
+    .tracking-box .code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+
+    /* CONSULTA ESTADO */
+    .status-search {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status-result {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status-timeline {
+      margin-top: 16px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 14px;
+      padding-bottom: 20px;
+      position: relative;
+    }
+
+    .timeline-item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 32px;
+      bottom: 0;
+      width: 2px;
+      background: var(--neutral-200);
+    }
+
+    .timeline-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      border: 2px solid var(--neutral-200);
+      background: var(--white);
+    }
+
+    .timeline-dot.done {
+      background: var(--success-light);
+      border-color: var(--success);
+    }
+
+    .timeline-dot.current {
+      background: var(--info-light);
+      border-color: var(--info);
+    }
+
+    .timeline-dot.pending {
+      background: var(--neutral-100);
+      border-color: var(--neutral-200);
+    }
+
+    .timeline-content h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .timeline-content p {
+      font-size: 12px;
+      color: var(--neutral-500);
+    }
+
+    /* ======== BACKOFFICE STYLES ======== */
+
+    /* DASHBOARD */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .kpi-card.blue::before {
+      background: var(--primary);
+    }
+
+    .kpi-card.orange::before {
+      background: var(--warning);
+    }
+
+    .kpi-card.green::before {
+      background: var(--success);
+    }
+
+    .kpi-card.red::before {
+      background: var(--danger);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--neutral-500);
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--neutral-900);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--neutral-400);
+    }
+
+    .kpi-icon {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 24px;
+      opacity: 0.15;
+    }
+
+    .kpi-trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .kpi-trend.up {
+      color: var(--success);
+    }
+
+    .kpi-trend.down {
+      color: var(--danger);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+    }
+
+    .chart-card {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--neutral-800);
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 140px;
+      padding-top: 10px;
+    }
+
+    .chart-bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chart-bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      background: var(--primary);
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+
+    .chart-bar:hover {
+      opacity: 1;
+    }
+
+    .chart-bar.alt {
+      background: var(--accent);
+    }
+
+    .chart-label {
+      font-size: 10px;
+      color: var(--neutral-400);
+    }
+
+    .chart-val {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--neutral-600);
+    }
+
+    .sla-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sla-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--neutral-200);
+      background: var(--neutral-50);
+    }
+
+    .sla-item.alert {
+      border-color: var(--danger);
+      background: var(--danger-light);
+    }
+
+    .sla-item.warn {
+      border-color: var(--warning);
+      background: var(--warning-light);
+    }
+
+    .sla-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .sla-dot.red {
+      background: var(--danger);
+    }
+
+    .sla-dot.orange {
+      background: var(--warning);
+    }
+
+    .sla-item .sla-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .sla-item .sla-time {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--danger);
+    }
+
+    .sla-item.warn .sla-time {
+      color: var(--warning);
+    }
+
+    .sla-item .sla-info {
+      font-size: 11px;
+      color: var(--neutral-600);
+    }
+
+    .workload-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .workload-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--neutral-400);
+      text-align: left;
+      padding: 6px 8px;
+    }
+
+    .workload-table td {
+      padding: 8px;
+      border-top: 1px solid var(--neutral-100);
+      font-size: 13px;
+    }
+
+    .workload-bar-wrap {
+      background: var(--neutral-100);
+      border-radius: 4px;
+      height: 6px;
+      margin-top: 3px;
+    }
+
+    .workload-bar {
+      height: 6px;
+      border-radius: 4px;
+      background: var(--primary);
+    }
+
+    /* LISTA SOLICITUDES */
+    .list-toolbar {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .search-input-wrap .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--neutral-400);
+      font-size: 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      border: 1.5px solid var(--neutral-200);
+      border-radius: 8px;
+      padding: 8px 12px 8px 34px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      color: var(--neutral-800);
+      outline: none;
+      background: var(--neutral-50);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      background: var(--white);
+    }
+
+    .filter-select {
+      border: 1.5px solid var(--neutral-200);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      color: var(--neutral-700);
+      background: var(--neutral-50);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .data-table-wrap {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table thead {
+      background: var(--neutral-50);
+    }
+
+    .data-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--neutral-500);
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--neutral-200);
+      font-weight: 600;
+    }
+
+    .data-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--neutral-100);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--neutral-50);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table .id-cell {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--primary);
+    }
+
+    .data-table .name-cell {
+      font-weight: 500;
+      color: var(--neutral-800);
+    }
+
+    .data-table .date-cell {
+      color: var(--neutral-500);
+      font-size: 12px;
+    }
+
+    /* BADGES DE ESTADO */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .badge-rechazada {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-rechazada::before {
+      background: #dc2626;
+    }
+
+    .badge-pendiente_pago {
+      background: #fef9c3;
+      color: #713f12;
+    }
+
+    .badge-pendiente_pago::before {
+      background: #ca8a04;
+    }
+
+    .badge-pagada {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .badge-pagada::before {
+      background: #2563eb;
+    }
+
+    .badge-emitida {
+      background: #f3e8ff;
+      color: #5b21b6;
+    }
+
+    .badge-emitida::before {
+      background: #7c3aed;
+    }
+
+    .action-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .action-btn.primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .action-btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .action-btn.ghost {
+      background: transparent;
+      color: var(--neutral-600);
+      border: 1px solid var(--neutral-200);
+    }
+
+    .action-btn.ghost:hover {
+      background: var(--neutral-100);
+    }
+
+    /* DETALLE SOLICITUD */
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+    }
+
+    .detail-section-card {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .detail-section-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--neutral-100);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--neutral-700);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--neutral-50);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .detail-field {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--neutral-100);
+    }
+
+    .detail-field:nth-child(odd) {
+      border-right: 1px solid var(--neutral-100);
+    }
+
+    .detail-field .df-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--neutral-400);
+      margin-bottom: 4px;
+    }
+
+    .detail-field .df-value {
+      font-size: 14px;
+      color: var(--neutral-800);
+      font-weight: 500;
+    }
+
+    .detail-field .df-value.masked {
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 2px;
+      color: var(--neutral-400);
+    }
+
+    .validation-panel {
+      padding: 20px;
+    }
+
+    .val-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-200);
+      margin-bottom: 8px;
+    }
+
+    .val-check .vc-icon {
+      font-size: 16px;
+    }
+
+    .val-check .vc-text {
+      font-size: 12px;
+      flex: 1;
+    }
+
+    .val-check .vc-text span {
+      font-weight: 600;
+      display: block;
+    }
+
+    .val-check .vc-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .val-check .vc-badge.ok {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .val-check .vc-badge.warn {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .val-check .vc-badge.override {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+
+    .override-btn {
+      font-size: 11px;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      padding: 0;
+    }
+
+    /* DRAG DROP */
+    .upload-area {
+      border: 2px dashed var(--neutral-300);
+      border-radius: 10px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--neutral-50);
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: var(--primary);
+      background: rgba(26, 58, 107, 0.04);
+    }
+
+    .upload-area .ua-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .upload-area h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neutral-700);
+      margin-bottom: 4px;
+    }
+
+    .upload-area p {
+      font-size: 12px;
+      color: var(--neutral-400);
+    }
+
+    /* LOGIN */
+    .login-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 40px;
+      width: 400px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .login-logo .llogo {
+      font-size: 40px;
+    }
+
+    .login-logo h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 8px;
+    }
+
+    .login-logo p {
+      font-size: 12px;
+      color: var(--neutral-500);
+      margin-top: 2px;
+    }
+
+    /* HISTORIAL CIUDADANO */
+    .historial-search {
+      margin-bottom: 20px;
+    }
+
+    .historial-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .historial-card {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .historial-card .hc-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .historial-card .hc-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .historial-card .hc-date {
+      font-size: 11px;
+      color: var(--neutral-400);
+    }
+
+    .historial-card .hc-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .download-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--primary);
+      color: var(--white);
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .download-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .download-btn:disabled {
+      background: var(--neutral-300);
+      cursor: not-allowed;
+    }
+
+    /* ======== OTP ======== */
+    .otp-input-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .otp-digit {
+      width: 48px;
+      height: 56px;
+      border: 2px solid var(--neutral-300);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--primary);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .otp-digit:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 58, 107, 0.12);
+    }
+
+    .otp-digit.filled {
+      border-color: var(--primary);
+      background: rgba(26, 58, 107, 0.04);
+    }
+
+    .otp-timer {
+      font-size: 13px;
+      color: var(--neutral-500);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .otp-timer span {
+      font-weight: 700;
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .otp-verified-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--success-light);
+      border: 1px solid #6ee7b7;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #065f46;
+      margin-bottom: 20px;
+    }
+
+    /* ======== BADGES FALTANTES ======== */
+    .badge-vencido {
+      background: #fef3c7;
+      color: #78350f;
+    }
+
+    .badge-vencido::before {
+      background: #d97706;
+    }
+
+    .badge-publicado_vencido {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .badge-publicado_vencido::before {
+      background: #9ca3af;
+    }
+
+    /* BANNER VENCIMIENTO */
+    .expired-banner {
+      background: var(--danger-light);
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .skip-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--neutral-400);
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: var(--neutral-100);
+      border-radius: 6px;
+      border: 1px dashed var(--neutral-300);
+    }
+
+    /* BOTONES GENERALES */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: var(--white);
+    }
+
+    .btn-success:hover {
+      background: #047857;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: var(--white);
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .btn-secondary {
+      background: var(--neutral-100);
+      color: var(--neutral-700);
+      border: 1px solid var(--neutral-200);
+    }
+
+    .btn-secondary:hover {
+      background: var(--neutral-200);
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: var(--white);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: var(--white);
+    }
+
+    .btn-accent:hover {
+      background: #a37409;
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 12px;
+    }
+
+    .btn-lg {
+      padding: 13px 28px;
+      font-size: 15px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .page-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--neutral-900);
+      margin-bottom: 2px;
+    }
+
+    .page-header p {
+      font-size: 13px;
+      color: var(--neutral-500);
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      display: none;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      width: 480px;
+      max-width: 90vw;
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--neutral-100);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--neutral-400);
+      padding: 0 4px;
+    }
+
+    .modal-close:hover {
+      color: var(--neutral-800);
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--neutral-100);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* TOAST */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: var(--neutral-900);
+      color: var(--white);
+      padding: 13px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 280px;
+      animation: slideIn 0.2s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(60px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 3px solid var(--danger);
+    }
+
+    .toast.info {
+      border-left: 3px solid var(--info);
+    }
+
+    /* AUDIT LOG */
+    .audit-log {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .audit-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--neutral-100);
+    }
+
+    .audit-item:last-child {
+      border-bottom: none;
+    }
+
+    .audit-item .ai-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+
+    .audit-item .ai-content {
+      flex: 1;
+    }
+
+    .audit-item .ai-action {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .audit-item .ai-meta {
+      font-size: 11px;
+      color: var(--neutral-400);
+      margin-top: 2px;
+    }
+
+    .audit-item .ai-time {
+      font-size: 11px;
+      color: var(--neutral-400);
+      white-space: nowrap;
+    }
+
+    /* SWITCH MODE BUTTON */
+    .mode-switch {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 500;
+      display: flex;
+      gap: 8px;
+    }
+
+    .mode-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
+    }
+
+    .mode-btn.inactive {
+      background: var(--white);
+      color: var(--neutral-600);
+      border-color: var(--neutral-200);
+    }
+
+    /* GESTIÃ“N DE EQUIPO */
+    .team-card {
+      background: var(--white);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--border-radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .team-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .team-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .team-meta {
+      font-size: 12px;
+      color: var(--neutral-400);
+    }
+
+    .team-badge {
+      font-size: 11px;
+      background: var(--neutral-100);
+      border: 1px solid var(--neutral-200);
+      border-radius: 6px;
+      padding: 2px 8px;
+    }
+
+    .team-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .active-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .active-tag.on {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .active-tag.off {
+      background: var(--neutral-100);
+      color: var(--neutral-400);
+    }
+
+    .page-tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--neutral-100);
+      border-radius: 9px;
+      padding: 3px;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+
+    .tab-btn {
+      padding: 7px 16px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--neutral-500);
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .tab-btn.active {
+      background: var(--white);
+      color: var(--neutral-900);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .info-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .dev-panel {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== SWITCH DE MODO ===== -->
+  <div class="mode-switch" id="modeSwitch">
+    <button class="mode-btn active" onclick="switchMode('portal')">ðŸŒ Portal Ciudadano</button>
+    <button class="mode-btn inactive" onclick="switchMode('login')">ðŸ” Panel Interno</button>
+  </div>
+
+  <!-- ===== PORTAL CIUDADANO ===== -->
+  <div id="portalApp">
+    <div style="display:flex; height:100vh; flex-direction:column;">
+
+      <!-- PORTAL NAV -->
+      <nav
+        style="background:var(--primary-dark); padding:0 32px; display:flex; align-items:center; height:56px; gap:24px; flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:8px;color:var(--white);">
+          <span style="font-size:20px;">âš–ï¸</span>
+          <span style="font-size:14px;font-weight:700;">Poder Judicial Santa Fe</span>
+          <span
+            style="background:var(--accent);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;color:var(--white);margin-left:6px;">RDAM</span>
+        </div>
+        <div style="display:flex;gap:4px;margin-left:auto;">
+          <button class="mode-btn" style="font-size:11px;padding:5px 12px;"
+            onclick="showPortalView('home')">Inicio</button>
+          <button class="mode-btn" style="font-size:11px;padding:5px 12px;" onclick="showPortalView('historial')">Mis
+            Solicitudes</button>
+          <button class="mode-btn" style="font-size:11px;padding:5px 12px;"
+            onclick="showPortalView('consulta')">Consultar Estado</button>
+        </div>
+      </nav>
+
+      <div style="flex:1;overflow-y:auto; background:var(--neutral-100);">
+        <div style="padding:32px; max-width:860px; margin:0 auto;">
+
+          <!-- HOME -->
+          <div class="view active" id="portal-home">
+            <div class="portal-hero">
+              <span class="shield">âš–ï¸</span>
+              <h1>Registro de Deudores<br>Alimentarios Morosos</h1>
+              <p>SolicitÃ¡ tu certificado RDAM de forma 100% digital. Sin turnos, sin colas. El Poder Judicial de la
+                Provincia de Santa Fe pone a tu disposiciÃ³n este trÃ¡mite en lÃ­nea.</p>
+              <div class="hero-badges">
+                <div class="hero-badge">âœ“ Sin registro previo</div>
+                <div class="hero-badge">âš¡ Proceso 100% digital</div>
+                <div class="hero-badge">ðŸ“§ Certificado por email</div>
+                <div class="hero-badge">ðŸ”’ Datos encriptados</div>
+              </div>
+              <button class="btn btn-accent btn-lg" onclick="showPortalView('otp-identificacion')">ðŸ“‹ Solicitar
+                Certificado</button>
+            </div>
+
+            <div class="info-cards">
+              <div class="info-card">
+                <div class="ic-icon">ðŸ“‹</div>
+                <h3>Â¿QuÃ© es el RDAM?</h3>
+                <p>El Registro de Deudores Alimentarios Morosos registra a personas que incumplen obligaciones de
+                  alimentos. El certificado acredita si una persona figura o no en este registro.</p>
+              </div>
+              <div class="info-card">
+                <div class="ic-icon">ðŸ“„</div>
+                <h3>Â¿Para quÃ© sirve?</h3>
+                <p>Es requerido para inscribirse en el registro de proveedores del Estado, obtener habilitaciones
+                  comerciales, concursar a cargos pÃºblicos y otros trÃ¡mites oficiales.</p>
+              </div>
+              <div class="info-card">
+                <div class="ic-icon">â±ï¸</div>
+                <h3>Vigencia 90 dÃ­as</h3>
+                <p>Una vez emitido, el certificado tiene validez de 90 dÃ­as corridos. PodÃ©s descargarlo las veces que
+                  necesites durante ese perÃ­odo.</p>
+              </div>
+            </div>
+
+            <div class="steps-section">
+              <h2>Â¿CÃ³mo funciona el trÃ¡mite?</h2>
+              <div class="steps">
+                <div class="step">
+                  <div class="step-num">1</div>
+                  <p><strong>VerificÃ¡ tu identidad</strong> con un cÃ³digo enviado a tu email</p>
+                </div>
+                <div class="step">
+                  <div class="step-num">2</div>
+                  <p><strong>CompletÃ¡ el formulario</strong> con tus datos personales</p>
+                </div>
+                <div class="step">
+                  <div class="step-num">3</div>
+                  <p><strong>RealizÃ¡ el pago</strong> mediante pasarela digital segura</p>
+                </div>
+                <div class="step">
+                  <div class="step-num">4</div>
+                  <p><strong>DescargÃ¡ tu certificado</strong> disponible por 90 dÃ­as</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OTP IDENTIFICACIÃ“N -->
+          <div class="view" id="portal-otp-identificacion">
+            <div class="portal-wrapper">
+              <div class="page-header">
+                <div>
+                  <h2>IdentificaciÃ³n del Solicitante</h2>
+                  <p>IngresÃ¡ tu DNI y email para recibir un cÃ³digo de acceso.</p>
+                </div>
+              </div>
+              <div class="form-card" style="max-width:480px;margin:0 auto;">
+                <div style="text-align:center;margin-bottom:28px;">
+                  <div style="font-size:52px;margin-bottom:12px;">ðŸ“§</div>
+                  <h3 style="font-size:19px;font-weight:700;color:var(--primary);margin-bottom:8px;">VerificÃ¡ tu
+                    identidad</h3>
+                  <p style="font-size:13px;color:var(--neutral-500);line-height:1.6;">Te enviaremos un cÃ³digo de 6
+                    dÃ­gitos a tu email para confirmar tu identidad antes de iniciar el trÃ¡mite.</p>
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label">DNI <span class="req">*</span></label>
+                  <input type="text" class="form-control" id="otpDNI" placeholder="Ej: 30456789"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                  <div class="form-hint">Sin puntos ni espacios</div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:28px;">
+                  <label class="form-label">Email <span class="req">*</span></label>
+                  <input type="email" class="form-control" id="otpEmail" placeholder="tucorreo@ejemplo.com">
+                  <div class="form-hint">El cÃ³digo llegarÃ¡ a esta direcciÃ³n. DurarÃ¡ 10 minutos.</div>
+                </div>
+
+                <button class="btn btn-primary btn-lg" id="btnSolicitarCodigo"
+                  style="width:100%;justify-content:center;" onclick="solicitarCodigo()">
+                  ðŸ“§ Enviar cÃ³digo al email
+                </button>
+                <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--neutral-400);">
+                  ðŸ”’ El cÃ³digo expira en 10 minutos y solo puede usarse una vez
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OTP VERIFICACIÃ“N -->
+          <div class="view" id="portal-otp-verificacion">
+            <div class="portal-wrapper">
+              <div class="page-header">
+                <div>
+                  <h2>IngresÃ¡ tu cÃ³digo de acceso</h2>
+                  <p>RevisÃ¡ tu bandeja de entrada y copiÃ¡ el cÃ³digo de 6 dÃ­gitos.</p>
+                </div>
+              </div>
+              <div class="form-card" style="max-width:480px;margin:0 auto;">
+                <div style="text-align:center;margin-bottom:24px;">
+                  <div style="font-size:48px;margin-bottom:12px;">ðŸ”¢</div>
+                  <p style="font-size:13px;color:var(--neutral-600);">Enviamos el cÃ³digo a <strong
+                      id="otpEmailDisplay">tu@email.com</strong></p>
+                </div>
+
+                <div class="otp-input-group">
+                  <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" data-idx="0"
+                    onkeyup="otpKeyUp(this,0)" oninput="this.classList.toggle('filled', this.value.length>0)">
+                  <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" data-idx="1"
+                    onkeyup="otpKeyUp(this,1)" oninput="this.classList.toggle('filled', this.value.length>0)">
+                  <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" data-idx="2"
+                    onkeyup="otpKeyUp(this,2)" oninput="this.classList.toggle('filled', this.value.length>0)">
+                  <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" data-idx="3"
+                    onkeyup="otpKeyUp(this,3)" oninput="this.classList.toggle('filled', this.value.length>0)">
+                  <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" data-idx="4"
+                    onkeyup="otpKeyUp(this,4)" oninput="this.classList.toggle('filled', this.value.length>0)">
+                  <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" data-idx="5"
+                    onkeyup="otpKeyUp(this,5)" oninput="this.classList.toggle('filled', this.value.length>0)">
+                </div>
+
+                <div class="otp-timer">CÃ³digo vÃ¡lido por <span id="otpTimer">10:00</span></div>
+                <div style="text-align:center;font-size:12px;color:var(--neutral-500);margin-bottom:20px;">
+                  Intentos restantes: <strong id="otpAttemptsLeft" style="color:var(--primary);">3</strong>
+                </div>
+
+                <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-bottom:12px;"
+                  onclick="verificarCodigo()">
+                  âœ“ Verificar cÃ³digo
+                </button>
+
+                <div style="text-align:center;margin-bottom:16px;">
+                  <button onclick="reenviarCodigo()"
+                    style="background:none;border:none;color:var(--primary);font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline;">
+                    Â¿No llegÃ³? Reenviar cÃ³digo
+                  </button>
+                </div>
+
+                <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;">
+                  <button class="btn btn-secondary btn-sm" onclick="showPortalView('otp-identificacion')">â† Cambiar
+                    email</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMULARIO -->
+          <div class="view" id="portal-formulario">
+            <div class="page-header">
+              <div>
+                <h2>Solicitud de Certificado RDAM</h2>
+                <p>CompletÃ¡ todos los campos requeridos. Tus datos serÃ¡n encriptados y tratados con confidencialidad.
+                </p>
+              </div>
+            </div>
+
+            <div class="otp-verified-banner" id="otpVerifiedBanner" style="display:none;">
+              <span style="font-size:18px;">âœ…</span>
+              <div><strong>Identidad verificada</strong> â€” Tu DNI fue confirmado. El campo DNI estÃ¡ bloqueado por
+                seguridad.</div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-section">
+                <div class="form-section-title">ðŸ“ CircunscripciÃ³n Judicial</div>
+                <div class="circ-select">
+                  <div class="circ-option selected" onclick="selectCirc(this)">
+                    <div class="circ-icon">ðŸ›ï¸</div>
+                    Santa Fe
+                  </div>
+                  <div class="circ-option" onclick="selectCirc(this)">
+                    <div class="circ-icon">ðŸŒ†</div>
+                    Rosario
+                  </div>
+                  <div class="circ-option" onclick="selectCirc(this)">
+                    <div class="circ-icon">ðŸ™ï¸</div>
+                    Venado Tuerto
+                  </div>
+                  <div class="circ-option" onclick="selectCirc(this)">
+                    <div class="circ-icon">ðŸ˜ï¸</div>
+                    Rafaela
+                  </div>
+                  <div class="circ-option" onclick="selectCirc(this)">
+                    <div class="circ-icon">ðŸŒ¿</div>
+                    Reconquista
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="form-section-title">ðŸ‘¤ Datos personales del solicitante</div>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">DNI <span class="req">*</span></label>
+                    <input type="text" class="form-control valid" placeholder="Ej: 30.456.789" value="30.456.789"
+                      id="dniInput" oninput="validateDNI(this)">
+                    <div class="validation-chip ok">âœ“ Formato vÃ¡lido</div>
+                    <div class="form-hint">ðŸ”’ Tu DNI serÃ¡ encriptado</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CUIL <span class="req">*</span></label>
+                    <input type="text" class="form-control valid" placeholder="Ej: 20-30456789-4" value="20-30456789-4">
+                    <div class="validation-chip ok">âœ“ Formato vÃ¡lido</div>
+                    <div class="form-hint">ðŸ”’ Tu CUIL serÃ¡ encriptado</div>
+                  </div>
+                  <div class="form-group span-2">
+                    <label class="form-label">Nombre completo <span class="req">*</span></label>
+                    <input type="text" class="form-control valid" placeholder="Apellido y nombre completo"
+                      value="GarcÃ­a MartÃ­nez, Juan Carlos">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Fecha de nacimiento <span class="req">*</span></label>
+                    <input type="date" class="form-control valid" value="1985-03-15">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email <span class="req">*</span></label>
+                    <input type="email" class="form-control valid" placeholder="tucorreo@ejemplo.com"
+                      value="jgarcia@email.com">
+                    <div class="form-hint">Te notificaremos aquÃ­ cuando el certificado estÃ© listo</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="background:var(--info-light);border:1px solid #bae6fd;border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#075985;display:flex;gap:10px;align-items:flex-start;">
+                <span style="font-size:18px;flex-shrink:0;">â„¹ï¸</span>
+                <div>
+                  <strong>Importante:</strong> Al enviar la solicitud serÃ¡s redirigido para realizar el pago. Tu trÃ¡mite
+                  solo iniciarÃ¡ una vez confirmado el mismo.
+                </div>
+              </div>
+
+              <div class="btn-group">
+                <button class="btn btn-primary btn-lg" onclick="submitFormulario()">Enviar Solicitud â†’</button>
+                <button class="btn btn-secondary" onclick="showPortalView('home')">Cancelar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAGO -->
+          <div class="view" id="portal-pago">
+            <div class="page-header">
+              <div>
+                <h2>Completar Pago</h2>
+                <p>EstÃ¡s a un paso. CompletÃ¡ el pago para iniciar tu solicitud RDAM.</p>
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div
+                style="display:flex;gap:14px;align-items:center;background:var(--success-light);border:1px solid #6ee7b7;border-radius:10px;padding:14px 18px;margin-bottom:24px;">
+                <span style="font-size:24px;">âœ…</span>
+                <div>
+                  <div style="font-weight:600;color:var(--success);font-size:14px;">Solicitud creada</div>
+                  <div style="font-size:12px;color:#065f46;">RDAM-2025-00247 Â· Pendiente de Pago</div>
+                </div>
+              </div>
+
+              <div class="pago-summary">
+                <div class="pago-row">
+                  <span>Certificado RDAM</span>
+                  <span>$ 2.500,00</span>
+                </div>
+                <div class="pago-row">
+                  <span style="color:var(--neutral-500);">Tasa de servicio</span>
+                  <span style="color:var(--neutral-500);">$ 250,00</span>
+                </div>
+                <div class="pago-row total">
+                  <span>Total a pagar</span>
+                  <span class="amount">$ 2.750,00</span>
+                </div>
+              </div>
+
+              <div class="form-section-title">ðŸ’³ SeleccionÃ¡ mÃ©todo de pago</div>
+              <div class="payment-methods" style="margin-bottom:24px;">
+                <div class="pm-option selected" onclick="selectPM(this)">
+                  <span class="pm-icon">ðŸ’³</span>
+                  <div>
+                    <div class="pm-label">Tarjeta</div>
+                    <div class="pm-sub">DÃ©bito o crÃ©dito</div>
+                  </div>
+                </div>
+                <div class="pm-option" onclick="selectPM(this)">
+                  <span class="pm-icon">ðŸ¦</span>
+                  <div>
+                    <div class="pm-label">Transferencia</div>
+                    <div class="pm-sub">CBU / CVU</div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:10px;padding:20px;margin-bottom:24px;">
+                <div class="form-grid">
+                  <div class="form-group span-2">
+                    <label class="form-label">NÃºmero de tarjeta</label>
+                    <input class="form-control" placeholder="1234 5678 9012 3456" value="4512 3456 7890 1234">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Vencimiento</label>
+                    <input class="form-control" placeholder="MM/AA" value="09/27">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CVV</label>
+                    <input class="form-control" placeholder="123" value="***">
+                  </div>
+                  <div class="form-group span-2">
+                    <label class="form-label">Titular de la tarjeta</label>
+                    <input class="form-control" value="GARCIA MARTINEZ JUAN C">
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--neutral-500);margin-bottom:20px;">
+                ðŸ”’ Pago seguro con encriptaciÃ³n SSL. Procesado por pasarela externa certificada.
+              </div>
+
+              <div class="btn-group">
+                <button class="btn btn-primary btn-lg" onclick="procesarPago()">Pagar $ 2.750,00 â†’</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONFIRMACION -->
+          <div class="view" id="portal-confirmacion">
+            <div class="form-card">
+              <div class="confirm-screen">
+                <div class="success-circle">âœ…</div>
+                <h2>Â¡Pago exitoso!</h2>
+                <p>Tu pago fue procesado correctamente. La solicitud fue recibida y un operario cargarÃ¡ tu certificado.
+                  RecibirÃ¡s una notificaciÃ³n por email cuando estÃ© disponible para descargar.</p>
+
+                <div class="tracking-box">
+                  <div class="label">CÃ³digo de seguimiento</div>
+                  <div class="code" id="confirmCodigoSeguimiento">RDAM-2025-00248</div>
+                </div>
+
+                <div
+                  style="background:var(--info-light);border:1px solid #bae6fd;border-radius:10px;padding:16px 20px;margin-bottom:24px;text-align:left;width:100%;max-width:420px;">
+                  <div style="font-weight:600;font-size:13px;color:#075985;margin-bottom:10px;">Â¿QuÃ© sigue?</div>
+                  <div style="font-size:12px;color:#0369a1;line-height:1.8;">
+                    1. Un operario del Poder Judicial revisarÃ¡ tu solicitud<br>
+                    2. Se cargarÃ¡ tu certificado PDF en el sistema<br>
+                    3. RecibirÃ¡s un email cuando estÃ© disponible<br>
+                    4. PodrÃ¡s descargarlo desde esta web por 90 dÃ­as
+                  </div>
+                </div>
+
+                <div class="btn-group">
+                  <button class="btn btn-primary" onclick="showPortalView('historial')">Ver mis solicitudes</button>
+                  <button class="btn btn-secondary" onclick="showPortalView('home')">Volver al inicio</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONSULTA ESTADO -->
+          <div class="view" id="portal-consulta">
+            <div class="page-header">
+              <div>
+                <h2>Consultar Estado de Solicitud</h2>
+                <p>IngresÃ¡ tu cÃ³digo de seguimiento o DNI y email para consultar el estado.</p>
+              </div>
+            </div>
+
+            <div class="status-search form-card" style="margin-bottom:16px;">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">CÃ³digo de solicitud</label>
+                  <input class="form-control" placeholder="RDAM-2025-XXXXX" value="RDAM-2025-00247">
+                </div>
+                <div class="form-group" style="display:flex;align-items:flex-end;">
+                  <div style="width:100%;display:flex;gap:8px;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="consultarEstado()">Consultar</button>
+                  </div>
+                </div>
+              </div>
+              <div style="text-align:center;color:var(--neutral-400);font-size:12px;margin-top:12px;">â€” o consultÃ¡ por
+                DNI â€”</div>
+              <div class="form-grid" style="margin-top:12px;">
+                <div class="form-group">
+                  <input class="form-control" placeholder="DNI sin puntos">
+                </div>
+                <div class="form-group">
+                  <input class="form-control" placeholder="Email registrado">
+                </div>
+              </div>
+            </div>
+
+            <div class="status-result" id="consultaResult">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+                <div>
+                  <div class="id-cell"
+                    style="font-family:'JetBrains Mono',monospace;color:var(--primary);font-size:16px;font-weight:700;margin-bottom:4px;">
+                    RDAM-2025-00247</div>
+                  <div style="font-size:13px;color:var(--neutral-600);">GarcÃ­a MartÃ­nez, Juan Carlos Â· DNI â€¢â€¢â€¢â€¢â€¢â€¢789
+                  </div>
+                </div>
+                <span class="status-badge badge-pagada">Pagada</span>
+              </div>
+
+              <div
+                style="background:var(--info-light);border:1px solid #bae6fd;border-radius:8px;padding:12px 16px;font-size:13px;color:#075985;margin-bottom:20px;">
+                <strong>Estado actual:</strong> Solicitud pagada y en proceso de emisiÃ³n. El personal del Poder
+                Judicial estÃ¡ generando tu certificado.
+              </div>
+
+              <div class="status-timeline">
+                <div class="timeline-item">
+                  <div class="timeline-dot done">âœ“</div>
+                  <div class="timeline-content">
+                    <h4>Solicitud creada</h4>
+                    <p>14/01/2025 a las 10:32 hs</p>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot done">âœ“</div>
+                  <div class="timeline-content">
+                    <h4>Pago confirmado</h4>
+                    <p>14/01/2025 a las 10:35 hs Â· Confirmado por pasarela</p>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot current">â³</div>
+                  <div class="timeline-content">
+                    <h4>En proceso</h4>
+                    <p>Solicitud pagada â€” Operario preparando el certificado...</p>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-dot pending"></div>
+                  <div class="timeline-content">
+                    <h4>Certificado disponible</h4>
+                    <p>Pendiente de emisiÃ³n</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HISTORIAL -->
+          <div class="view" id="portal-historial">
+            <div class="page-header">
+              <h2>Mis Solicitudes</h2>
+            </div>
+
+            <div class="historial-search form-card" style="padding:16px;margin-bottom:16px;">
+              <div style="display:flex;gap:10px;">
+                <input class="form-control" placeholder="DNI sin puntos para ver tus solicitudes" style="flex:1;"
+                  value="30456789">
+                <button class="btn btn-primary">Buscar</button>
+              </div>
+            </div>
+
+            <div class="historial-items">
+              <div class="historial-card">
+                <div>
+                  <div class="hc-id">RDAM-2025-00247</div>
+                  <div class="hc-name">GarcÃ­a MartÃ­nez, Juan Carlos</div>
+                  <div class="hc-date">Solicitud: 14/01/2025 Â· CircunscripciÃ³n: Santa Fe</div>
+                </div>
+                <span class="status-badge badge-pagada" style="margin-left:auto;margin-right:8px;">Pagada</span>
+                <div class="hc-actions">
+                  <button class="download-btn" disabled>ðŸ“„ Pendiente</button>
+                </div>
+              </div>
+
+              <div class="historial-card">
+                <div>
+                  <div class="hc-id">RDAM-2024-01823</div>
+                  <div class="hc-name">GarcÃ­a MartÃ­nez, Juan Carlos</div>
+                  <div class="hc-date">Solicitud: 03/09/2024 Â· CircunscripciÃ³n: Santa Fe Â· Vence: 01/12/2024</div>
+                </div>
+                <span class="status-badge badge-emitida" style="margin-left:auto;margin-right:8px;">Emitida</span>
+                <div class="hc-actions">
+                  <button class="download-btn" onclick="showToast('Descargando certificado PDF...','success')">ðŸ“¥
+                    Descargar</button>
+                </div>
+              </div>
+
+              <div class="historial-card">
+                <div>
+                  <div class="hc-id">RDAM-2024-00891</div>
+                  <div class="hc-name">GarcÃ­a MartÃ­nez, Juan Carlos</div>
+                  <div class="hc-date">Solicitud: 15/03/2024 Â· CircunscripciÃ³n: Santa Fe Â· Emitida: 18/03/2024</div>
+                  <div class="expired-banner">â›” Certificado vencido â€” Pasaron 90 dÃ­as desde la emisiÃ³n. DebÃ©s solicitar
+                    uno nuevo.</div>
+                </div>
+                <span class="status-badge badge-publicado_vencido" style="margin-left:auto;margin-right:8px;">Cert.
+                  Vencido</span>
+                <div class="hc-actions">
+                  <button class="download-btn" disabled title="Descarga bloqueada por vencimiento">ðŸ”’ Vencido</button>
+                </div>
+              </div>
+
+              <div class="historial-card">
+                <div>
+                  <div class="hc-id">RDAM-2024-01105</div>
+                  <div class="hc-name">GarcÃ­a MartÃ­nez, Juan Carlos</div>
+                  <div class="hc-date">Solicitud: 12/05/2024 Â· CircunscripciÃ³n: Rosario</div>
+                </div>
+                <span class="status-badge badge-rechazada" style="margin-left:auto;margin-right:8px;">Rechazada</span>
+                <div class="hc-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="showPortalView('otp-identificacion')">Nueva
+                    solicitud</button>
+                </div>
+              </div>
+
+              <div class="historial-card">
+                <div>
+                  <div class="hc-id">RDAM-2023-00512</div>
+                  <div class="hc-name">GarcÃ­a MartÃ­nez, Juan Carlos</div>
+                  <div class="hc-date">Solicitud: 20/11/2023 Â· CircunscripciÃ³n: Santa Fe Â· Sin pago en mÃ¡s de 60 dÃ­as
+                  </div>
+                  <div class="expired-banner">â° Solicitud vencida â€” No se recibiÃ³ el pago dentro de los 60 días corridos.
+                  </div>
+                </div>
+                <span class="status-badge badge-vencido" style="margin-left:auto;margin-right:8px;">Vencida</span>
+                <div class="hc-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="showPortalView('otp-identificacion')">Nueva
+                    solicitud</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LOGIN PAGE ===== -->
+  <div id="loginPage" class="hidden">
+    <div class="login-page">
+      <div class="login-card">
+        <div class="login-logo">
+          <div class="llogo">âš–ï¸</div>
+          <h1>RDAM Â· Panel Interno</h1>
+          <p>Poder Judicial de la Provincia de Santa Fe</p>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Usuario</label>
+          <input type="text" class="form-control" value="operario.rodriguez">
+        </div>
+
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">ContraseÃ±a</label>
+          <input type="password" class="form-control" value="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+        </div>
+
+        <div style="text-align:right;margin-bottom:20px;">
+          <a href="#" style="font-size:12px;color:var(--primary);">Â¿Olvidaste tu contraseÃ±a?</a>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button class="btn btn-primary" style="width:100%;justify-content:center;"
+            onclick="loginAs('operario')">Ingresar como Operario</button>
+          <button class="btn btn-accent" style="width:100%;justify-content:center;"
+            onclick="loginAs('supervisor')">Ingresar como Supervisor</button>
+        </div>
+
+        <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--neutral-400);">
+          Acceso exclusivo para personal del Poder Judicial
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BACKOFFICE APP ===== -->
+  <div id="backofficeApp" class="hidden">
+    <div class="app">
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="logo-icon">âš–ï¸</div>
+          <div class="brand-text">
+            <h1>RDAM</h1>
+            <p>Poder Judicial Â· Santa Fe</p>
+          </div>
+        </div>
+
+        <!-- SIDEBAR OPERARIO -->
+        <div id="sidebar-operario">
+          <div class="sidebar-section">
+            <div class="sidebar-label">Principal</div>
+            <div class="sidebar-item active" onclick="showView('lista')">
+              <span class="icon">ðŸ“‹</span>
+              Solicitudes
+              <span class="badge" id="badgePendientes">7</span>
+            </div>
+            <div class="sidebar-item" onclick="showView('carga')">
+              <span class="icon">ðŸ“„</span>
+              Cargar PDF
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDEBAR SUPERVISOR -->
+        <div id="sidebar-supervisor" class="hidden">
+          <div class="sidebar-section">
+            <div class="sidebar-label">Principal</div>
+            <div class="sidebar-item" onclick="showView('dashboard')">
+              <span class="icon">ðŸ“Š</span>
+              Dashboard
+            </div>
+            <div class="sidebar-item active" onclick="showView('lista')">
+              <span class="icon">ðŸ“‹</span>
+              Solicitudes
+              <span class="badge" id="badgePendientes2">7</span>
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-label">SupervisiÃ³n</div>
+            <div class="sidebar-item" onclick="showView('equipo')">
+              <span class="icon">ðŸ‘¥</span>
+              Equipo
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="user-chip">
+            <div class="user-avatar operario" id="sidebarAvatar">RO</div>
+            <div class="user-info">
+              <h4 id="sidebarName">L. RodrÃ­guez</h4>
+              <p id="sidebarRole">Operario Â· Santa Fe</p>
+            </div>
+            <button
+              style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;"
+              onclick="logout()" title="Cerrar sesiÃ³n">â</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main">
+        <div class="topbar">
+          <div class="breadcrumb" id="breadcrumb">
+            <span>RDAM</span>
+            <span class="sep">â€º</span>
+            <span class="current">Solicitudes</span>
+          </div>
+          <div class="topbar-actions">
+            <div class="topbar-badge">
+              ðŸ””
+              <div class="dot"></div>
+            </div>
+            <div style="font-size:12px;color:var(--neutral-500);" id="topbarUser">Operario Â· Santa Fe</div>
+          </div>
+        </div>
+
+        <div class="page-content">
+
+          <!-- DASHBOARD -->
+          <div class="view" id="view-dashboard">
+            <div class="page-header">
+              <div>
+                <h2>Dashboard</h2>
+                <p>Resumen operativo â€” actualizado al 15/01/2025</p>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-secondary btn-sm">ðŸ“… Ãšltimos 30 dÃ­as</button>
+                <button class="btn btn-secondary btn-sm">â¬‡ï¸ Exportar</button>
+              </div>
+            </div>
+
+            <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
+              <div class="kpi-card" style="--kpi-color:#ca8a04;">
+                <div class="kpi-icon">â³</div>
+                <style>
+                  .kpi-card.yellow::before {
+                    background: #ca8a04;
+                  }
+                </style>
+                <div class="kpi-card yellow">
+                  <div class="kpi-icon">â³</div>
+                  <div class="kpi-label">Pendientes de Pago</div>
+                  <div class="kpi-value">23</div>
+                  <div class="kpi-sub"><span style="color:var(--warning);font-size:12px;">â³ Esperando webhook</span>
+                  </div>
+                </div>
+              </div>
+              <div class="kpi-card blue">
+                <div class="kpi-icon">ðŸ’³</div>
+                <div class="kpi-label">Pagadas (listas)</div>
+                <div class="kpi-value">7</div>
+                <div class="kpi-sub"><span style="color:var(--info);font-size:12px;">ðŸ“‹ Pendientes de emisiÃ³n</span>
+                </div>
+              </div>
+              <div class="kpi-card green">
+                <div class="kpi-icon">âœ…</div>
+                <div class="kpi-label">Emitidas</div>
+                <div class="kpi-value">186</div>
+                <div class="kpi-sub"><span class="kpi-trend up">â†‘ +8 hoy</span></div>
+              </div>
+              <div class="kpi-card red">
+                <div class="kpi-icon">âŒ</div>
+                <div class="kpi-label">Rechazadas</div>
+                <div class="kpi-value">14</div>
+                <div class="kpi-sub">5.6% del total</div>
+              </div>
+              <div class="kpi-card orange">
+                <div class="kpi-icon">ðŸ—“ï¸</div>
+                <div class="kpi-label">Vencidas (sin pago)</div>
+                <div class="kpi-value">11</div>
+                <div class="kpi-sub"><span style="font-size:12px;color:var(--neutral-400);">Cron 60 dÃ­as</span></div>
+              </div>
+              <div class="kpi-card" style="border-top:4px solid #9ca3af;">
+                <div class="kpi-icon">ðŸ“</div>
+                <div class="kpi-label">Cert. Vencidos</div>
+                <div class="kpi-value">7</div>
+                <div class="kpi-sub"><span style="font-size:12px;color:var(--neutral-400);">Cron 90 dÃ­as</span></div>
+              </div>
+            </div>
+
+            <div class="dashboard-grid">
+              <div>
+                <div class="chart-card">
+                  <h3>ðŸ“ˆ Solicitudes por circunscripciÃ³n</h3>
+                  <div class="chart-bars">
+                    <div class="chart-bar-wrap">
+                      <div class="chart-val">89</div>
+                      <div class="chart-bar" style="height:89%;"></div>
+                      <div class="chart-label">Santa Fe</div>
+                    </div>
+                    <div class="chart-bar-wrap">
+                      <div class="chart-val">72</div>
+                      <div class="chart-bar alt" style="height:72%;"></div>
+                      <div class="chart-label">Rosario</div>
+                    </div>
+                    <div class="chart-bar-wrap">
+                      <div class="chart-val">38</div>
+                      <div class="chart-bar" style="height:38%;"></div>
+                      <div class="chart-label">V. Tuerto</div>
+                    </div>
+                    <div class="chart-bar-wrap">
+                      <div class="chart-val">31</div>
+                      <div class="chart-bar alt" style="height:31%;"></div>
+                      <div class="chart-label">Rafaela</div>
+                    </div>
+                    <div class="chart-bar-wrap">
+                      <div class="chart-val">18</div>
+                      <div class="chart-bar" style="height:18%;"></div>
+                      <div class="chart-label">Reconquista</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chart-card" style="margin-top:16px;">
+                  <h3>ðŸ‘¥ Carga de trabajo del equipo</h3>
+                  <table class="workload-table">
+                    <thead>
+                      <tr>
+                        <th>Operario</th>
+                        <th>Asignadas</th>
+                        <th>Completadas</th>
+                        <th>Carga</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>L. RodrÃ­guez</strong></td>
+                        <td>12</td>
+                        <td>8</td>
+                        <td>
+                          <div class="workload-bar-wrap">
+                            <div class="workload-bar" style="width:80%;"></div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>M. GonzÃ¡lez</strong></td>
+                        <td>9</td>
+                        <td>6</td>
+                        <td>
+                          <div class="workload-bar-wrap">
+                            <div class="workload-bar" style="width:60%;"></div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>S. LÃ³pez</strong></td>
+                        <td>15</td>
+                        <td>11</td>
+                        <td>
+                          <div class="workload-bar-wrap">
+                            <div class="workload-bar" style="width:95%;background:var(--danger);"></div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>A. Ferreyra</strong></td>
+                        <td>7</td>
+                        <td>5</td>
+                        <td>
+                          <div class="workload-bar-wrap">
+                            <div class="workload-bar" style="width:47%;background:var(--success);"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <div class="chart-card" style="margin-bottom:16px;">
+                  <h3>âš¡ Tiempos promedio</h3>
+                  <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
+                    <div
+                      style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--neutral-50);border-radius:8px;border:1px solid var(--neutral-200);">
+                      <div style="font-size:12px;color:var(--neutral-600);">ðŸ’³ Pago â†’ Inicio proceso</div>
+                      <div style="font-weight:700;font-size:16px;color:var(--primary);">18.5 hs</div>
+                    </div>
+                    <div
+                      style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--neutral-50);border-radius:8px;border:1px solid var(--neutral-200);">
+                      <div style="font-size:12px;color:var(--neutral-600);">ðŸ“„ Inicio proceso â†’ EmisiÃ³n</div>
+                      <div style="font-weight:700;font-size:16px;color:var(--success);">4.2 hs</div>
+                    </div>
+                    <div
+                      style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--neutral-50);border-radius:8px;border:1px solid var(--neutral-200);">
+                      <div style="font-size:12px;color:var(--neutral-600);">â±ï¸ Total (pago â†’ descarga)</div>
+                      <div style="font-weight:700;font-size:16px;color:var(--primary);">22.7 hs</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chart-card">
+                  <h3>âš ï¸ Alertas SLA</h3>
+                  <div class="sla-list">
+                    <div class="sla-item alert">
+                      <div class="sla-dot red"></div>
+                      <div style="flex:1;">
+                        <div class="sla-id">RDAM-2025-00231</div>
+                        <div class="sla-info">LÃ³pez PÃ©rez Â· Rosario</div>
+                      </div>
+                      <div class="sla-time">+52 hs</div>
+                    </div>
+                    <div class="sla-item alert">
+                      <div class="sla-dot red"></div>
+                      <div style="flex:1;">
+                        <div class="sla-id">RDAM-2025-00218</div>
+                        <div class="sla-info">MartÃ­nez B. Â· Santa Fe</div>
+                      </div>
+                      <div class="sla-time">+48 hs</div>
+                    </div>
+                    <div class="sla-item warn">
+                      <div class="sla-dot orange"></div>
+                      <div style="flex:1;">
+                        <div class="sla-id">RDAM-2025-00240</div>
+                        <div class="sla-info">Torres A. Â· Rafaela</div>
+                      </div>
+                      <div class="sla-time" style="color:var(--warning);">+36 hs</div>
+                    </div>
+                    <div class="sla-item warn">
+                      <div class="sla-dot orange"></div>
+                      <div style="flex:1;">
+                        <div class="sla-id">RDAM-2025-00244</div>
+                        <div class="sla-info">GÃ³mez R. Â· Rosario</div>
+                      </div>
+                      <div class="sla-time" style="color:var(--warning);">+30 hs</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LISTA SOLICITUDES -->
+          <div class="view active" id="view-lista">
+            <div class="page-header">
+              <div>
+                <h2>Solicitudes</h2>
+                <p>248 solicitudes totales Â· ordenadas por antigÃ¼edad</p>
+              </div>
+              <div id="supervisor-actions-lista" class="hidden">
+                <button class="btn btn-secondary btn-sm" onclick="openModal('assignModal')">ðŸ‘¤ Asignar
+                  seleccionadas</button>
+              </div>
+            </div>
+
+            <div class="list-toolbar">
+              <div class="search-input-wrap">
+                <span class="search-icon">ðŸ”</span>
+                <input type="text" class="search-input" placeholder="Buscar por ID, nombre o DNI...">
+              </div>
+              <select class="filter-select">
+                <option>Todos los estados</option>
+                <option>Pendiente de pago</option>
+                <option>Pagada</option>
+                <option>Rechazada</option>
+                <option>Vencida</option>
+                <option>Emitida</option>
+                <option>Cert. vencido</option>
+              </select>
+              <select class="filter-select">
+                <option>Todas las circunscripciones</option>
+                <option>Santa Fe</option>
+                <option>Rosario</option>
+                <option>Venado Tuerto</option>
+                <option>Rafaela</option>
+                <option>Reconquista</option>
+              </select>
+              <input type="date" class="filter-select" value="2025-01-01" style="color:var(--neutral-700);">
+              <input type="date" class="filter-select" value="2025-01-15" style="color:var(--neutral-700);">
+              <div id="operario-filter" class="hidden">
+                <select class="filter-select">
+                  <option>Todos los operarios</option>
+                  <option>L. RodrÃ­guez</option>
+                  <option>M. GonzÃ¡lez</option>
+                  <option>S. LÃ³pez</option>
+                  <option>A. Ferreyra</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="data-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width:32px;"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+                    <th>ID Solicitud</th>
+                    <th>Solicitante</th>
+                    <th>CircunscripciÃ³n</th>
+                    <th>Estado</th>
+                    <th>Fecha creaciÃ³n</th>
+                    <th>Asignado a</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><input type="checkbox"></td>
+                    <td class="id-cell">RDAM-2025-00231</td>
+                    <td>
+                      <div class="name-cell">LÃ³pez PÃ©rez, MarÃ­a</div>
+                      <div style="font-size:11px;color:var(--neutral-400);">mlopez@email.com</div>
+                    </td>
+                    <td>Rosario</td>
+                    <td><span class="status-badge badge-pendiente_pago">Pendiente pago</span></td>
+                    <td class="date-cell">10/01/2025<br><span style="font-size:10px;">âš  hace 5 dÃ­as</span></td>
+                    <td style="color:var(--neutral-400);font-size:12px;">Sin asignar</td>
+                    <td>
+                      <div style="display:flex;gap:6px;">
+                        <button class="action-btn primary" onclick="showView('detalle')">Ver</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox"></td>
+                    <td class="id-cell">RDAM-2025-00235</td>
+                    <td>
+                      <div class="name-cell">FernÃ¡ndez, Roberto A.</div>
+                      <div style="font-size:11px;color:var(--neutral-400);">rfernandez@gmail.com</div>
+                    </td>
+                    <td>Santa Fe</td>
+                    <td><span class="status-badge badge-pagada">Pagada</span></td>
+                    <td class="date-cell">11/01/2025</td>
+                    <td style="font-size:12px;">L. RodrÃ­guez</td>
+                    <td>
+                      <button class="action-btn primary" onclick="showView('detalle')">Ver</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox"></td>
+                    <td class="id-cell">RDAM-2025-00238</td>
+                    <td>
+                      <div class="name-cell">SÃ¡nchez, Ana Paula</div>
+                      <div style="font-size:11px;color:var(--neutral-400);">asanchez@outlook.com</div>
+                    </td>
+                    <td>Rafaela</td>
+                    <td><span class="status-badge badge-emitida">Emitida</span></td>
+                    <td class="date-cell">12/01/2025</td>
+                    <td style="font-size:12px;">M. GonzÃ¡lez</td>
+                    <td>
+                      <button class="action-btn primary" onclick="showView('detalle')">Ver</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox"></td>
+                    <td class="id-cell">RDAM-2025-00241</td>
+                    <td>
+                      <div class="name-cell">GimÃ©nez Torres, Luis</div>
+                      <div style="font-size:11px;color:var(--neutral-400);">lgimenez@hotmail.com</div>
+                    </td>
+                    <td>Venado Tuerto</td>
+                    <td><span class="status-badge badge-pagada">Pagada</span></td>
+                    <td class="date-cell">13/01/2025</td>
+                    <td style="font-size:12px;">S. LÃ³pez</td>
+                    <td>
+                      <button class="action-btn primary" onclick="showView('carga')">Cargar PDF</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox"></td>
+                    <td class="id-cell">RDAM-2025-00244</td>
+                    <td>
+                      <div class="name-cell">RodrÃ­guez, Carla M.</div>
+                      <div style="font-size:11px;color:var(--neutral-400);">crodriguez@gmail.com</div>
+                    </td>
+                    <td>Rosario</td>
+                    <td><span class="status-badge badge-pendiente_pago">Pendiente pago</span></td>
+                    <td class="date-cell">13/01/2025</td>
+                    <td style="color:var(--neutral-400);font-size:12px;">Sin asignar</td>
+                    <td>
+                      <button class="action-btn primary" onclick="showView('detalle')">Ver</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox"></td>
+                    <td class="id-cell">RDAM-2025-00246</td>
+                    <td>
+                      <div class="name-cell">Blanco, MartÃ­n P.</div>
+                      <div style="font-size:11px;color:var(--neutral-400);">mblanco@empresa.com</div>
+                    </td>
+                    <td>Reconquista</td>
+                    <td><span class="status-badge badge-rechazada">Rechazada</span></td>
+                    <td class="date-cell">14/01/2025</td>
+                    <td style="font-size:12px;">L. RodrÃ­guez</td>
+                    <td>
+                      <button class="action-btn ghost" onclick="showView('detalle')">Ver</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="checkbox"></td>
+                    <td class="id-cell">RDAM-2025-00247</td>
+                    <td>
+                      <div class="name-cell">GarcÃ­a MartÃ­nez, Juan C.</div>
+                      <div style="font-size:11px;color:var(--neutral-400);">jgarcia@email.com</div>
+                    </td>
+                    <td>Santa Fe</td>
+                    <td><span class="status-badge badge-emitida">Emitida</span></td>
+                    <td class="date-cell">14/01/2025</td>
+                    <td style="font-size:12px;">L. RodrÃ­guez</td>
+                    <td>
+                      <button class="action-btn ghost" onclick="showView('detalle')">Ver</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div
+                style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--neutral-100);">
+                <span style="font-size:12px;color:var(--neutral-400);">Mostrando 7 de 248 solicitudes</span>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-secondary btn-sm">â† Anterior</button>
+                  <button class="btn btn-primary btn-sm">Siguiente â†’</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DETALLE / REVISIÃ“N -->
+          <div class="view" id="view-detalle">
+            <div class="page-header">
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                  <button class="btn btn-secondary btn-sm" onclick="showView('lista')">â† Volver</button>
+                  <span
+                    style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--primary);">RDAM-2025-00235</span>
+                  <span class="status-badge badge-pagada">Pagada</span>
+                </div>
+                <p>GarcÃ­a MartÃ­nez, Juan C. Â· Solicitud: 14/01/2025 10:32 hs Â· Pago confirmado: 14/01/2025 10:35 hs</p>
+              </div>
+              <div class="btn-group" id="detalle-actions">
+                <button class="btn btn-primary" onclick="showView('carga')">ðŸ“¤ Cargar certificado PDF</button>
+                <button class="btn btn-secondary btn-sm" onclick="openModal('reasignarModal')">â†© Reasignar</button>
+              </div>
+            </div>
+
+            <div class="detail-layout">
+              <div>
+                <!-- DATOS CIUDADANO -->
+                <div class="detail-section-card">
+                  <div class="detail-section-header">ðŸ‘¤ Datos del solicitante</div>
+                  <div class="detail-grid">
+                    <div class="detail-field">
+                      <div class="df-label">DNI</div>
+                      <div class="df-value masked">â€¢â€¢â€¢â€¢â€¢â€¢789</div>
+                    </div>
+                    <div class="detail-field">
+                      <div class="df-label">CUIL</div>
+                      <div class="df-value masked">20-â€¢â€¢â€¢â€¢â€¢â€¢89-4</div>
+                    </div>
+                    <div class="detail-field">
+                      <div class="df-label">Nombre completo</div>
+                      <div class="df-value">FernÃ¡ndez, Roberto A.</div>
+                    </div>
+                    <div class="detail-field">
+                      <div class="df-label">Fecha de nacimiento</div>
+                      <div class="df-value">22/06/1978</div>
+                    </div>
+                    <div class="detail-field">
+                      <div class="df-label">Email</div>
+                      <div class="df-value">rfernandez@gmail.com</div>
+                    </div>
+                    <div class="detail-field">
+                      <div class="df-label">CircunscripciÃ³n</div>
+                      <div class="df-value">ðŸ›ï¸ Santa Fe</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- INFO DE PAGO -->
+                <div class="detail-section-card">
+                  <div class="detail-section-header">ðŸ’³ InformaciÃ³n de Pago</div>
+                  <div class="validation-panel">
+                    <div class="val-check">
+                      <span class="vc-icon">âœ…</span>
+                      <div class="vc-text">
+                        <span>Estado del pago</span>
+                        Confirmado vÃ­a webhook de pasarela
+                      </div>
+                      <span class="vc-badge ok">Confirmado</span>
+                    </div>
+                    <div class="val-check">
+                      <span class="vc-icon">ðŸ’°</span>
+                      <div class="vc-text">
+                        <span>Monto abonado</span>
+                        $3.500,00 ARS
+                      </div>
+                      <span class="vc-badge ok">âœ“ Acreditado</span>
+                    </div>
+                    <div class="val-check">
+                      <span class="vc-icon">ðŸ“…</span>
+                      <div class="vc-text">
+                        <span>Fecha de confirmaciÃ³n</span>
+                        14/01/2025 a las 10:35 hs
+                      </div>
+                      <span class="vc-badge ok">âœ“ Vigente</span>
+                    </div>
+                    <div class="val-check">
+                      <span class="vc-icon">ðŸ”‘</span>
+                      <div class="vc-text">
+                        <span>Referencia de transacciÃ³n</span>
+                        TXN-20250114-00352841
+                      </div>
+                      <span class="vc-badge ok">Registrado</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- HISTORIAL AUDITORÃA -->
+                <div class="detail-section-card">
+                  <div class="detail-section-header">ðŸ“‹ Historial de auditorÃ­a</div>
+                  <div class="audit-log">
+                    <div class="audit-item">
+                      <div class="ai-dot"></div>
+                      <div class="ai-content">
+                        <div class="ai-action">Solicitud creada por ciudadano</div>
+                        <div class="ai-meta">Sistema automÃ¡tico (portal)</div>
+                      </div>
+                      <div class="ai-time">14/01 10:32</div>
+                    </div>
+                    <div class="audit-item">
+                      <div class="ai-dot" style="background:var(--success);"></div>
+                      <div class="ai-content">
+                        <div class="ai-action">Pago confirmado Â· PENDIENTE_PAGO â†’ PAGADA</div>
+                        <div class="ai-meta" style="color:var(--success);font-weight:600;">WEBHOOK Â· Pasarela de pago Â·
+                          TXN-20250114-00352841</div>
+                      </div>
+                      <div class="ai-time">14/01 10:35</div>
+                    </div>
+                    <div class="audit-item">
+                      <div class="ai-dot" style="background:var(--info);"></div>
+                      <div class="ai-content">
+                        <div class="ai-action">Solicitud asignada a operario</div>
+                        <div class="ai-meta">S. Montoya (Supervisor) â†’ L. RodrÃ­guez</div>
+                      </div>
+                      <div class="ai-time">14/01 11:15</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANEL LATERAL -->
+              <div>
+                <div class="detail-section-card">
+                  <div class="detail-section-header">ðŸ“Š Info de solicitud</div>
+                  <div style="padding:16px;">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                      <div>
+                        <div style="font-size:11px;color:var(--neutral-400);margin-bottom:2px;">ESTADO ACTUAL</div>
+                        <span class="status-badge badge-pagada">Pagada</span>
+                      </div>
+                      <div>
+                        <div style="font-size:11px;color:var(--neutral-400);margin-bottom:2px;">ASIGNADO A</div>
+                        <div style="font-size:13px;font-weight:500;">L. RodrÃ­guez</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px;color:var(--neutral-400);margin-bottom:2px;">FECHA CREACIÃ“N</div>
+                        <div style="font-size:13px;">14/01/2025 10:32 hs</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px;color:var(--neutral-400);margin-bottom:2px;">PAGO CONFIRMADO</div>
+                        <div style="font-size:13px;color:var(--success);font-weight:600;">âœ… 14/01/2025 10:35 hs</div>
+                      </div>
+                      <div>
+                        <div style="font-size:11px;color:var(--neutral-400);margin-bottom:2px;">TIEMPO EN ESTADO</div>
+                        <div style="font-size:13px;font-weight:600;color:var(--warning);">4 horas 23 minutos</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ACCIÃ“N PRINCIPAL: CARGAR PDF -->
+                <div class="detail-section-card" style="border:2px solid var(--success);">
+                  <div class="detail-section-header" style="background:var(--success-light);color:#065f46;">ðŸ“¤ AcciÃ³n
+                    requerida</div>
+                  <div style="padding:16px;">
+                    <p style="font-size:13px;color:var(--neutral-600);margin-bottom:12px;">Este solicitud estÃ¡ pagada.
+                      CargÃ¡ el certificado PDF para emitirlo al ciudadano.</p>
+                    <button class="btn btn-success" style="width:100%;justify-content:center;"
+                      onclick="showView('carga')">ðŸ“¤ Cargar certificado PDF</button>
+                  </div>
+                </div>
+
+                <div class="detail-section-card" id="supervisor-detalle-panel" style="display:none;">
+                  <div class="detail-section-header">ðŸ‘‘ Acciones Supervisor</div>
+                  <div style="padding:16px;display:flex;flex-direction:column;gap:8px;">
+                    <button class="btn btn-warning btn-sm" style="justify-content:center;"
+                      onclick="openModal('forzarEstadoModal')">âš¡ Forzar estado</button>
+                    <button class="btn btn-secondary btn-sm" style="justify-content:center;"
+                      onclick="showToast('Caso desbloqueado','success')">ðŸ”“ Desbloquear caso</button>
+                    <button class="btn btn-secondary btn-sm" style="justify-content:center;"
+                      onclick="showToast('Caso reabierto','info')">â†© Reabrir caso</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARGA PDF -->
+          <div class="view" id="view-carga">
+            <div class="page-header">
+              <div>
+                <h2>Cargar Certificado PDF</h2>
+                <p>Solo solicitudes con estado "Pagada" estÃ¡n disponibles para carga</p>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;">
+              <div class="detail-section-card">
+                <div class="detail-section-header">ðŸ“‹ SeleccionÃ¡ la solicitud</div>
+                <div style="padding:20px;">
+                  <div style="margin-bottom:16px;">
+                    <div class="search-input-wrap">
+                      <span class="search-icon">ðŸ”</span>
+                      <input class="search-input" placeholder="Buscar solicitud pagada..." value="RDAM-2025-00241">
+                    </div>
+                  </div>
+
+                  <div
+                    style="background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                      <div>
+                        <div
+                          style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--primary);">
+                          RDAM-2025-00241</div>
+                        <div style="font-size:13px;font-weight:500;margin-top:2px;">GimÃ©nez Torres, Luis</div>
+                        <div style="font-size:11px;color:var(--neutral-400);">Venado Tuerto Â· Pagado: 13/01/2025</div>
+                      </div>
+                      <span class="status-badge badge-pagada">Pagada</span>
+                    </div>
+                  </div>
+
+                  <div class="form-section-title">ðŸ“„ Subir certificado PDF</div>
+
+                  <div class="upload-area" id="dropZone" ondragover="dragOver(event)" ondragleave="dragLeave(event)"
+                    ondrop="dropFile(event)" onclick="document.getElementById('fileInput').click()">
+                    <div class="ua-icon" id="uploadIcon">ðŸ“</div>
+                    <h4 id="uploadTitle">ArrastrÃ¡ el PDF aquÃ­ o hacÃ© click para seleccionar</h4>
+                    <p id="uploadSubtitle">Solo archivos PDF Â· MÃ¡ximo 5MB</p>
+                    <input type="file" id="fileInput" accept=".pdf" style="display:none;" onchange="fileSelected(this)">
+                  </div>
+
+                  <div id="filePreview" class="hidden"
+                    style="background:var(--success-light);border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:20px;">ðŸ“„</span>
+                    <div style="flex:1;">
+                      <div style="font-weight:600;font-size:13px;color:var(--success);" id="fileName">
+                        certificado-rdam.pdf</div>
+                      <div style="font-size:11px;color:#065f46;" id="fileSize">1.2 MB Â· PDF</div>
+                    </div>
+                    <button onclick="clearFile()"
+                      style="background:none;border:none;cursor:pointer;color:var(--success);font-size:16px;">âœ•</button>
+                  </div>
+
+                  <div style="margin-top:20px;">
+                    <button class="btn btn-success" onclick="subirCertificado()"
+                      style="width:100%;justify-content:center;">
+                      ðŸ“¤ Emitir Certificado y Notificar Ciudadano
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="detail-section-card">
+                  <div class="detail-section-header">ðŸ“‹ Cola de espera</div>
+                  <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+                    <div
+                      style="background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:8px;padding:10px 12px;cursor:pointer;border-left:3px solid var(--primary);">
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--primary);">
+                        RDAM-2025-00241</div>
+                      <div style="font-size:12px;font-weight:500;">GimÃ©nez Torres, Luis</div>
+                      <div style="font-size:10px;color:var(--neutral-400);">Venado Tuerto</div>
+                    </div>
+                    <div
+                      style="background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:8px;padding:10px 12px;cursor:pointer;">
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--primary);">
+                        RDAM-2025-00239</div>
+                      <div style="font-size:12px;font-weight:500;">Aguirre, Patricia S.</div>
+                      <div style="font-size:10px;color:var(--neutral-400);">Rosario</div>
+                    </div>
+                    <div
+                      style="background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:8px;padding:10px 12px;cursor:pointer;">
+                      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--primary);">
+                        RDAM-2025-00233</div>
+                      <div style="font-size:12px;font-weight:500;">Vega, NicolÃ¡s A.</div>
+                      <div style="font-size:10px;color:var(--neutral-400);">Santa Fe</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EQUIPO -->
+          <div class="view" id="view-equipo">
+            <div class="page-header">
+              <div>
+                <h2>GestiÃ³n de Equipo</h2>
+                <p>AdministrÃ¡ operarios y asignaciÃ³n de carga</p>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openModal('nuevoOperarioModal')">+ Nuevo operario</button>
+            </div>
+
+            <div class="page-tabs">
+              <button class="tab-btn active" onclick="switchTab('operarios', this)">ðŸ‘¥ Operarios</button>
+              <button class="tab-btn" onclick="switchTab('asignaciones', this)">ðŸ“‹ Asignaciones</button>
+            </div>
+
+            <div id="tab-operarios">
+              <div class="team-card">
+                <div class="team-avatar" style="background:#1a3a6b;">LR</div>
+                <div>
+                  <div class="team-name">LucÃ­a RodrÃ­guez</div>
+                  <div class="team-meta">Santa Fe Â· <span class="team-badge">Operario</span></div>
+                </div>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+                  <div style="text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--primary);">12</div>
+                    <div style="font-size:10px;color:var(--neutral-400);">Asignadas</div>
+                  </div>
+                  <div style="text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--success);">8</div>
+                    <div style="font-size:10px;color:var(--neutral-400);">Emitidas</div>
+                  </div>
+                  <span class="active-tag on">â— Activo</span>
+                  <button class="btn btn-secondary btn-sm">Desactivar</button>
+                  <button class="btn btn-secondary btn-sm" onclick="openModal('assignModal')">Asignar</button>
+                </div>
+              </div>
+
+              <div class="team-card">
+                <div class="team-avatar" style="background:#2558a8;">MG</div>
+                <div>
+                  <div class="team-name">Miguel GonzÃ¡lez</div>
+                  <div class="team-meta">Rosario Â· <span class="team-badge">Operario</span></div>
+                </div>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+                  <div style="text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--primary);">9</div>
+                    <div style="font-size:10px;color:var(--neutral-400);">Asignadas</div>
+                  </div>
+                  <div style="text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--success);">6</div>
+                    <div style="font-size:10px;color:var(--neutral-400);">Emitidas</div>
+                  </div>
+                  <span class="active-tag on">â— Activo</span>
+                  <button class="btn btn-secondary btn-sm">Desactivar</button>
+                  <button class="btn btn-secondary btn-sm" onclick="openModal('assignModal')">Asignar</button>
+                </div>
+              </div>
+
+              <div class="team-card">
+                <div class="team-avatar" style="background:#dc2626;">SL</div>
+                <div>
+                  <div class="team-name">SofÃ­a LÃ³pez</div>
+                  <div class="team-meta">Santa Fe Â· <span class="team-badge">Operario</span></div>
+                </div>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+                  <div style="text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--danger);">15</div>
+                    <div style="font-size:10px;color:var(--neutral-400);">Asignadas</div>
+                  </div>
+                  <div style="text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--success);">11</div>
+                    <div style="font-size:10px;color:var(--neutral-400);">Emitidas</div>
+                  </div>
+                  <span class="active-tag on">â— Activo</span>
+                  <button class="btn btn-secondary btn-sm">Desactivar</button>
+                  <button class="btn btn-secondary btn-sm" onclick="openModal('assignModal')">Asignar</button>
+                </div>
+              </div>
+
+              <div class="team-card" style="opacity:0.6;">
+                <div class="team-avatar" style="background:var(--neutral-400);">AF</div>
+                <div>
+                  <div class="team-name">AndrÃ©s Ferreyra</div>
+                  <div class="team-meta">Rafaela Â· <span class="team-badge">Operario</span></div>
+                </div>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+                  <div style="text-align:center;">
+                    <div style="font-size:20px;font-weight:700;color:var(--neutral-400);">0</div>
+                    <div style="font-size:10px;color:var(--neutral-400);">Asignadas</div>
+                  </div>
+                  <span class="active-tag off">â—‹ Inactivo</span>
+                  <button class="btn btn-success btn-sm"
+                    onclick="showToast('Operario reactivado','success')">Activar</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="tab-asignaciones" class="hidden">
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID Solicitud</th>
+                      <th>Solicitante</th>
+                      <th>Estado</th>
+                      <th>Operario asignado</th>
+                      <th>Desde</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="id-cell">RDAM-2025-00231</td>
+                      <td>LÃ³pez PÃ©rez, MarÃ­a</td>
+                      <td><span class="status-badge badge-pendiente_pago">Pendiente pago</span></td>
+                      <td style="color:var(--neutral-400);">Sin asignar</td>
+                      <td class="date-cell">10/01/2025</td>
+                      <td><button class="action-btn primary" onclick="openModal('assignModal')">Asignar</button></td>
+                    </tr>
+                    <tr>
+                      <td class="id-cell">RDAM-2025-00235</td>
+                      <td>FernÃ¡ndez, Roberto A.</td>
+                      <td><span class="status-badge badge-pagada">Pagada</span></td>
+                      <td>L. RodrÃ­guez</td>
+                      <td class="date-cell">11/01/2025</td>
+                      <td><button class="action-btn ghost" onclick="openModal('assignModal')">Reasignar</button></td>
+                    </tr>
+                    <tr>
+                      <td class="id-cell">RDAM-2025-00241</td>
+                      <td>GimÃ©nez Torres, Luis</td>
+                      <td><span class="status-badge badge-pagada">Pagada</span></td>
+                      <td>S. LÃ³pez</td>
+                      <td class="date-cell">13/01/2025</td>
+                      <td><button class="action-btn ghost" onclick="openModal('assignModal')">Reasignar</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- DEV PANEL -->
+      <aside class="dev-panel">
+        <div class="dev-panel-header">
+          <h3>ðŸ›  Dev Notes</h3>
+          <span style="font-size:10px;color:var(--neutral-500);">RDAM v1.0 Â· Nivel 2</span>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>Vista actual</h4>
+          <div class="dev-note">
+            <span class="key">view: </span><span class="val" id="devCurrentView">"lista"</span><br>
+            <span class="key">role: </span><span class="val" id="devCurrentRole">"operario"</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>Endpoints â€” Lista</h4>
+          <div class="dev-note">
+            <span class="dev-tag method-get">GET</span>
+            <span class="endpoint">/api/admin/solicitudes</span><br>
+            <span
+              class="comment">?estado=&circ=&from=&to=<br>&dni=&page=&limit=20<br>&sort=fecha_creacion&order=asc</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>Endpoints â€” Detalle</h4>
+          <div class="dev-note">
+            <span class="dev-tag method-get">GET</span>
+            <span class="endpoint">/api/admin/solicitudes/:id</span><br>
+            <span class="dev-tag method-patch">PATCH</span>
+            <span class="endpoint">/api/admin/solicitudes/:id/estado</span><br>
+            <span class="comment">body: {estado, observaciones?}</span><br>
+            <span class="dev-tag method-post">POST</span>
+            <span class="endpoint">/api/admin/solicitudes/:id/pdf</span><br>
+            <span class="comment">multipart/form-data</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>Transiciones de estado</h4>
+          <div class="dev-note">
+            <span class="comment">// VÃ¡lidas por rol</span><br>
+            <span class="key">PENDIENTE_PAGO</span> â†’<br>
+            <span class="val"> PAGADA | RECHAZADA</span><br>
+            <span class="key">PAGADA</span> â†’<br>
+            <span class="val"> EMITIDA</span><br>
+            <span class="key">EMITIDA</span> â†’<br>
+            <span class="val"> PUBLICADO-VENCIDO</span><br>
+            <span class="key">forzado (SUPERVISOR)</span> â†’<br>
+            <span class="val"> PENDIENTE_PAGO | PAGADA | RECHAZADA | VENCIDO</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>Auth</h4>
+          <div class="dev-note">
+            <span class="comment">// JWT Bearer token</span><br>
+            <span class="key">header: </span><span class="val">Authorization</span><br>
+            <span class="key">exp: </span><span class="val">8h</span><br>
+            <span class="key">refresh: </span><span class="val">24h</span><br>
+            <span class="comment">// Roles: OPERARIO, SUPERVISOR</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>EncriptaciÃ³n sensible</h4>
+          <div class="dev-note">
+            <span class="comment">// AES-256-GCM</span><br>
+            <span class="key">campos: </span><span class="val">dni, cuil</span><br>
+            <span class="key">bÃºsqueda: </span><span class="val">hash(dni) blind index</span><br>
+            <span class="comment">// Desencriptar solo en<br>// detalle + rol autorizado</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>Upload PDF</h4>
+          <div class="dev-note">
+            <span class="key">tipo: </span><span class="val">multipart/form-data</span><br>
+            <span class="key">max: </span><span class="val">5MB</span><br>
+            <span class="key">formato: </span><span class="val">application/pdf</span><br>
+            <span class="key">storage: </span><span class="val">S3 / MinIO</span><br>
+            <span class="key">url_exp: </span><span class="val">5-15 min (vigencia de descarga: 90 días)</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>AuditorÃ­a</h4>
+          <div class="dev-note">
+            <span class="comment">// Trigger automÃ¡tico en<br>// cada PATCH de estado</span><br>
+            <span class="key">tabla: </span><span class="val">auditoria</span><br>
+            <span class="key">campos: </span><span class="val">solicitud_id,<br> usuario_id, estado_ant,<br>
+              estado_nuevo, ts, obs</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>Email (emisiÃ³n)</h4>
+          <div class="dev-note">
+            <span class="comment">// Solo on estado=emitida</span><br>
+            <span class="key">trigger: </span><span class="val">webhook interno</span><br>
+            <span class="key">template: </span><span class="val">rdam_emision</span><br>
+            <span class="key">vars: </span><span class="val">nombre, codigo,<br> link_descarga, vencimiento</span><br>
+            <span class="key">link_exp: </span><span class="val">fecha_emision + 90d</span>
+          </div>
+        </div>
+
+        <div class="dev-panel-section">
+          <h4>SLA Config</h4>
+          <div class="dev-note">
+            <span class="key">alert_threshold: </span><span class="val">48h</span><br>
+            <span class="key">warn_threshold: </span><span class="val">30h</span><br>
+            <span class="comment">// Cron cada 30min<br>// Notif a supervisor</span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- ===== MODALES ===== -->
+
+  <!-- Emitir -->
+  <div class="modal-overlay" id="aprobarModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>✅ Confirmar emisión</h3>
+        <button class="modal-close" onclick="closeModal('aprobarModal')">âœ•</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--neutral-600);margin-bottom:12px;">¿Confirmás la emisión del certificado para la solicitud
+          <strong>RDAM-2025-00235</strong>?
+        </p>
+        <div
+          style="background:var(--success-light);border:1px solid #6ee7b7;border-radius:8px;padding:12px;font-size:13px;color:#065f46;">
+          Al emitir, la solicitud pasará a estado EMITIDA y el ciudadano podrá descargar el certificado por 90 días.
+          Esta acción queda registrada en el log de auditoría.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('aprobarModal')">Cancelar</button>
+        <button class="btn btn-success" onclick="aprobarSolicitud()">Confirmar emisión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rechazar -->
+  <div class="modal-overlay" id="rechazarModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>âŒ Rechazar solicitud</h3>
+        <button class="modal-close" onclick="closeModal('rechazarModal')">âœ•</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--neutral-600);margin-bottom:16px;">Solicitud
+          <strong>RDAM-2025-00235</strong> â€” FernÃ¡ndez, Roberto A.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Observaciones para el ciudadano <span
+              style="color:var(--neutral-400);font-weight:400;">(opcional)</span></label>
+          <textarea class="form-control" rows="4" placeholder="IngresÃ¡ el motivo del rechazo..."
+            style="resize:vertical;"></textarea>
+          <div class="form-hint">El ciudadano podrÃ¡ ver estas observaciones en el portal y deberÃ¡ crear una nueva
+            solicitud.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('rechazarModal')">Cancelar</button>
+        <button class="btn btn-danger" onclick="rechazarSolicitud()">Confirmar rechazo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reasignar -->
+  <div class="modal-overlay" id="reasignarModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>â†© Reasignar solicitud</h3>
+        <button class="modal-close" onclick="closeModal('reasignarModal')">âœ•</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Asignar a operario</label>
+          <select class="form-control">
+            <option>L. RodrÃ­guez (12 asignadas)</option>
+            <option>M. GonzÃ¡lez (9 asignadas)</option>
+            <option>S. LÃ³pez (15 asignadas)</option>
+            <option>A. Ferreyra (INACTIVO)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('reasignarModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="reasignar()">Confirmar reasignaciÃ³n</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Asignar -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>ðŸ‘¤ Asignar solicitudes</h3>
+        <button class="modal-close" onclick="closeModal('assignModal')">âœ•</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Seleccionar operario</label>
+          <select class="form-control">
+            <option>L. RodrÃ­guez (12 asignadas â€” Santa Fe)</option>
+            <option>M. GonzÃ¡lez (9 asignadas â€” Rosario)</option>
+            <option>S. LÃ³pez (15 asignadas â€” Santa Fe)</option>
+            <option>A. Ferreyra (0 asignadas â€” Rafaela)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('assignModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="asignar()">Asignar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nuevo Operario -->
+  <div class="modal-overlay" id="nuevoOperarioModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>âž• Nuevo operario</h3>
+        <button class="modal-close" onclick="closeModal('nuevoOperarioModal')">âœ•</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid" style="gap:14px;">
+          <div class="form-group span-2">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-control" placeholder="Apellido y nombre">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Usuario</label>
+            <input class="form-control" placeholder="usuario.apellido">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ContraseÃ±a temporal</label>
+            <input type="password" class="form-control" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+          </div>
+          <div class="form-group span-2">
+            <label class="form-label">CircunscripciÃ³n</label>
+            <select class="form-control">
+              <option>Santa Fe</option>
+              <option>Rosario</option>
+              <option>Venado Tuerto</option>
+              <option>Rafaela</option>
+              <option>Reconquista</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('nuevoOperarioModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="crearOperario()">Crear operario</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forzar Estado (Supervisor) -->
+  <div class="modal-overlay" id="forzarEstadoModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>âš¡ Forzar Estado (Supervisor)</h3>
+        <button class="modal-close" onclick="closeModal('forzarEstadoModal')">âœ•</button>
+      </div>
+      <div class="modal-body">
+        <div
+          style="background:var(--warning-light, #fffbeb);border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;font-size:13px;color:#78350f;margin-bottom:16px;">
+          âš ï¸ Esta acciÃ³n queda registrada en el log de auditorÃ­a con flag <strong>forzado_supervisor = true</strong>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Estado de destino</label>
+          <select class="form-control" id="estadoDestino">
+            <option value="">â€” SeleccionÃ¡ un estado â€”</option>
+            <option value="pendiente_pago">Pendiente de Pago</option>
+            <option value="pagada">Pagada</option>
+            <option value="rechazada">Rechazada</option>
+            <option value="vencido">Vencida</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Motivo (obligatorio) <span class="req">*</span></label>
+          <textarea class="form-control" id="motivoForzado" rows="3"
+            placeholder="DescribÃ­ el motivo del cambio forzado..." style="resize:vertical;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('forzarEstadoModal')">Cancelar</button>
+        <button class="btn btn-warning" onclick="forzarEstado()">âš¡ Confirmar cambio forzado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+
+  <script>
+    // ===== STATE =====
+    let currentMode = 'portal';
+    let currentRole = 'operario';
+    let currentPortalView = 'home';
+    let currentBackView = 'lista';
+
+    // ===== MODE SWITCH =====
+    function switchMode(mode) {
+      currentMode = mode;
+      const btns = document.querySelectorAll('.mode-btn');
+      document.getElementById('portalApp').classList.toggle('hidden', mode !== 'portal');
+      document.getElementById('loginPage').classList.toggle('hidden', mode !== 'login');
+      document.getElementById('backofficeApp').classList.toggle('hidden', !['operario', 'supervisor'].includes(mode) && mode !== 'backoffice');
+
+      if (mode === 'portal') {
+        btns[0].classList.add('active'); btns[0].classList.remove('inactive');
+        btns[1].classList.add('inactive'); btns[1].classList.remove('active');
+        document.getElementById('backofficeApp').classList.add('hidden');
+      } else {
+        btns[1].classList.add('active'); btns[1].classList.remove('inactive');
+        btns[0].classList.add('inactive'); btns[0].classList.remove('active');
+        document.getElementById('portalApp').classList.add('hidden');
+        document.getElementById('loginPage').classList.remove('hidden');
+        document.getElementById('backofficeApp').classList.add('hidden');
+      }
+    }
+
+    function loginAs(role) {
+      currentRole = role;
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('backofficeApp').classList.remove('hidden');
+
+      // Configure sidebar
+      const sidebarOperario = document.getElementById('sidebar-operario');
+      const sidebarSupervisor = document.getElementById('sidebar-supervisor');
+      const avatar = document.getElementById('sidebarAvatar');
+      const name = document.getElementById('sidebarName');
+      const roleEl = document.getElementById('sidebarRole');
+      const topbarUser = document.getElementById('topbarUser');
+
+      if (role === 'supervisor') {
+        sidebarOperario.classList.add('hidden');
+        sidebarSupervisor.classList.remove('hidden');
+        avatar.className = 'user-avatar supervisor';
+        avatar.textContent = 'SM';
+        name.textContent = 'S. Montoya';
+        roleEl.textContent = 'Supervisor Â· Santa Fe';
+        topbarUser.textContent = 'Supervisor Â· Santa Fe';
+
+        // Show supervisor extras
+        document.getElementById('supervisor-actions-lista').classList.remove('hidden');
+        document.getElementById('operario-filter').classList.remove('hidden');
+        document.getElementById('supervisor-detalle-panel').style.display = 'block';
+
+        showView('dashboard');
+      } else {
+        sidebarOperario.classList.remove('hidden');
+        sidebarSupervisor.classList.add('hidden');
+        avatar.className = 'user-avatar operario';
+        avatar.textContent = 'RO';
+        name.textContent = 'L. RodrÃ­guez';
+        roleEl.textContent = 'Operario Â· Santa Fe';
+        topbarUser.textContent = 'Operario Â· Santa Fe';
+        showView('lista');
+      }
+
+      document.getElementById('devCurrentRole').textContent = `"${role}"`;
+    }
+
+    function logout() {
+      document.getElementById('backofficeApp').classList.add('hidden');
+      document.getElementById('loginPage').classList.remove('hidden');
+    }
+
+    // ===== NAVIGATION =====
+    function showView(viewName) {
+      const views = document.querySelectorAll('#backofficeApp .view');
+      views.forEach(v => v.classList.remove('active'));
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.classList.add('active');
+
+      // Update sidebar active state
+      const items = document.querySelectorAll('.sidebar-item');
+      items.forEach(i => i.classList.remove('active'));
+
+      const breadcrumbMap = {
+        dashboard: 'Dashboard',
+        lista: 'Solicitudes',
+        detalle: 'Detalle de solicitud',
+        carga: 'Cargar PDF',
+        equipo: 'GestiÃ³n de equipo'
+      };
+
+      document.getElementById('breadcrumb').innerHTML = `
+      <span>RDAM</span>
+      <span class="sep">â€º</span>
+      <span class="current">${breadcrumbMap[viewName] || viewName}</span>
+    `;
+
+      document.getElementById('devCurrentView').textContent = `"${viewName}"`;
+      currentBackView = viewName;
+    }
+
+    function showPortalView(viewName) {
+      const views = document.querySelectorAll('#portalApp .view');
+      views.forEach(v => v.classList.remove('active'));
+      const target = document.getElementById('portal-' + viewName);
+      if (target) target.classList.add('active');
+      currentPortalView = viewName;
+    }
+
+    // ===== PORTAL INTERACTIONS =====
+    function selectCirc(el) {
+      document.querySelectorAll('.circ-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function selectPM(el) {
+      document.querySelectorAll('.pm-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function submitFormulario() {
+      // SIMULACIÃ“N DE ENVÃO
+      const btn = document.querySelector('#portal-formulario .btn-primary');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="loading-spinner"></span> Procesando...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        // Ã‰xito -> Ir a PAGO
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showPortalView('pago');
+        window.scrollTo(0, 0);
+        showToast('Solicitud creada. Iniciando pago...', 'success');
+      }, 1500);
+    }
+
+    function realizarPago() {
+      const btn = document.querySelector('#portal-pago .btn-primary');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="loading-spinner"></span> Procesando pago...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showPortalView('confirmacion'); // Ir a confirmaciÃ³n post-pago
+        window.scrollTo(0, 0);
+        showToast('Pago confirmado exitosamente', 'success');
+      }, 2000);
+    }
+
+    function consultarEstado() {
+      document.getElementById('consultaResult').style.display = 'block';
+      showToast('Solicitud encontrada', 'success');
+    }
+
+    function validateDNI(input) {
+      const chip = input.nextElementSibling;
+      const val = input.value.replace(/\D/g, '');
+      if (val.length >= 7) {
+        input.classList.add('valid');
+        input.classList.remove('error');
+        chip.className = 'validation-chip ok';
+        chip.textContent = 'âœ“ Formato vÃ¡lido';
+      } else if (val.length > 0) {
+        input.classList.remove('valid');
+        input.classList.add('error');
+        chip.className = 'validation-chip err';
+        chip.textContent = 'âœ— DNI invÃ¡lido';
+      }
+    }
+
+    // ===== BACKOFFICE INTERACTIONS =====
+    function aprobarSolicitud() {
+      closeModal('aprobarModal');
+      showToast('âœ“ Certificado emitido. El ciudadano puede descargarlo por 90 dÃ­as.', 'success');
+      showView('lista');
+    }
+
+    function rechazarSolicitud() {
+      closeModal('rechazarModal');
+      showToast('Solicitud rechazada. Se registrÃ³ la observaciÃ³n en auditorÃ­a.', 'info');
+      showView('lista');
+    }
+
+    function reasignar() {
+      closeModal('reasignarModal');
+      showToast('Solicitud reasignada correctamente', 'success');
+    }
+
+    function asignar() {
+      closeModal('assignModal');
+      showToast('Solicitudes asignadas correctamente', 'success');
+    }
+
+    function crearOperario() {
+      closeModal('nuevoOperarioModal');
+      showToast('Operario creado exitosamente', 'success');
+    }
+
+    function subirCertificado() {
+      const preview = document.getElementById('filePreview');
+      if (!preview.classList.contains('hidden')) {
+        showToast('ðŸŽ‰ Certificado emitido. Email enviado al ciudadano.', 'success');
+        setTimeout(() => showView('lista'), 1500);
+      } else {
+        showToast('SeleccionÃ¡ un archivo PDF primero', 'error');
+      }
+    }
+
+    // ===== DRAG & DROP =====
+    function dragOver(e) {
+      e.preventDefault();
+      document.getElementById('dropZone').classList.add('dragover');
+    }
+
+    function dragLeave(e) {
+      document.getElementById('dropZone').classList.remove('dragover');
+    }
+
+    function dropFile(e) {
+      e.preventDefault();
+      document.getElementById('dropZone').classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') {
+        showFilePreview(file);
+      } else {
+        showToast('Solo se aceptan archivos PDF', 'error');
+      }
+    }
+
+    function fileSelected(input) {
+      const file = input.files[0];
+      if (file) showFilePreview(file);
+    }
+
+    function showFilePreview(file) {
+      document.getElementById('filePreview').classList.remove('hidden');
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB Â· PDF';
+      document.getElementById('uploadIcon').textContent = 'âœ…';
+      document.getElementById('uploadTitle').textContent = 'Archivo seleccionado';
+    }
+
+    function clearFile() {
+      document.getElementById('filePreview').classList.add('hidden');
+      document.getElementById('fileInput').value = '';
+      document.getElementById('uploadIcon').textContent = 'ðŸ“';
+      document.getElementById('uploadTitle').textContent = 'ArrastrÃ¡ el PDF aquÃ­ o hacÃ© click para seleccionar';
+    }
+
+    // ===== TABS =====
+    function switchTab(tabName, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-operarios').classList.toggle('hidden', tabName !== 'operarios');
+      document.getElementById('tab-asignaciones').classList.toggle('hidden', tabName !== 'asignaciones');
+    }
+
+    // ===== MODAL =====
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    // Close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('open');
+      });
+    });
+
+    // ===== TOAST =====
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icons = { success: 'âœ…', error: 'âŒ', info: 'â„¹ï¸' };
+      toast.innerHTML = `<span>${icons[type] || 'â„¹ï¸'}</span><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // ===== CHECKBOX =====
+    function toggleAll(masterCb) {
+      document.querySelectorAll('.data-table tbody input[type=checkbox]').forEach(cb => {
+        cb.checked = masterCb.checked;
+      });
+    }
+
+    // ===== INIT =====
+    // Start on portal home
+    showPortalView('home');
+
+    // ===== OTP STATE =====
+    let otpVerified = false;
+    let otpDNIValue = '';
+    let otpEmailValue = '';
+    let otpAttempts = 3;
+    let timerInterval = null;
+
+    // ===== OTP FUNCTIONS =====
+    function solicitarCodigo() {
+      const dni = document.getElementById('otpDNI').value.trim();
+      const email = document.getElementById('otpEmail').value.trim();
+      if (!dni || !email) {
+        showToast('IngresÃ¡ tu DNI y email para continuar', 'error');
+        return;
+      }
+      otpDNIValue = dni;
+      otpEmailValue = email;
+
+      const btn = document.getElementById('btnSolicitarCodigo');
+      btn.disabled = true;
+      btn.innerHTML = 'â³ Enviando...';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'ðŸ“§ Enviar cÃ³digo al email';
+
+        // Mostrar email en la pantalla de verificaciÃ³n
+        const display = document.getElementById('otpEmailDisplay');
+        if (display) display.textContent = otpEmailValue;
+
+        showPortalView('otp-verificacion');
+        startOtpTimer();
+        showToast('âœ‰ï¸ CÃ³digo enviado a ' + otpEmailValue, 'success');
+      }, 1200);
+    }
+
+    function startOtpTimer() {
+      let seconds = 600;
+      const el = document.getElementById('otpTimer');
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        seconds--;
+        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const s = String(seconds % 60).padStart(2, '0');
+        if (el) el.textContent = m + ':' + s;
+        if (seconds <= 0) clearInterval(timerInterval);
+      }, 1000);
+    }
+
+    function verificarCodigo() {
+      const digits = Array.from(document.querySelectorAll('.otp-digit')).map(d => d.value).join('');
+      if (digits.length < 6) {
+        showToast('IngresÃ¡ los 6 dÃ­gitos del cÃ³digo', 'error');
+        return;
+      }
+      // En POC cualquier cÃ³digo de 6 dÃ­gitos funciona
+      clearInterval(timerInterval);
+      otpVerified = true;
+
+      // Pre-llenar y bloquear el DNI en el formulario
+      const dniInput = document.getElementById('dniInput');
+      if (dniInput) {
+        dniInput.value = otpDNIValue;
+        dniInput.setAttribute('readonly', 'readonly');
+        dniInput.style.background = 'var(--neutral-100)';
+        dniInput.style.color = 'var(--neutral-500)';
+      }
+
+      // Mostrar banner de verificado
+      const banner = document.getElementById('otpVerifiedBanner');
+      if (banner) banner.style.display = 'flex';
+
+      showPortalView('formulario');
+      window.scrollTo(0, 0);
+      showToast('âœ… Identidad verificada. CompletÃ¡ tu solicitud.', 'success');
+    }
+    function reenviarCodigo() {
+      otpAttempts = 3;
+      document.querySelectorAll('.otp-digit').forEach(d => { d.value = ''; d.classList.remove('filled'); });
+      const el = document.getElementById('otpAttemptsLeft');
+      if (el) el.textContent = '3';
+      startOtpTimer();
+      showToast('ðŸ“§ Nuevo cÃ³digo enviado a ' + otpEmailValue, 'info');
+    }
+
+    function otpKeyUp(input, idx) {
+      if (input.value.length === 1) {
+        const next = document.querySelector(`.otp-digit[data-idx="${idx + 1}"]`);
+        if (next) next.focus();
+      }
+      if (input.value.length === 0 && idx > 0) {
+        const prev = document.querySelector(`.otp-digit[data-idx="${idx - 1}"]`);
+        if (prev) prev.focus();
+      }
+    }
+
+    // ===== PAGO CONECTADO AL BACKOFFICE =====
+    function procesarPago() {
+      const btn = document.querySelector('#portal-pago .btn-primary');
+      if (!btn) return;
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Procesando pago...';
+
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+
+        // Mostrar confirmaciÃ³n en el portal
+        showPortalView('confirmacion');
+        window.scrollTo(0, 0);
+        showToast('âœ… Pago confirmado exitosamente', 'success');
+
+        // Simular webhook: actualizar backoffice
+        setTimeout(() => updateBackofficeAfterPayment(), 500);
+      }, 2000);
+    }
+
+    function updateBackofficeAfterPayment() {
+      // Buscar la fila de la nueva solicitud (RDAM-2025-00248) y actualizarla a PAGADA
+      // Si no existe, agregar una fila nueva al inicio de la tabla
+      const tbody = document.querySelector('#view-lista tbody');
+      if (!tbody) return;
+
+      // Verificar si ya existe la fila
+      let existingRow = null;
+      tbody.querySelectorAll('tr').forEach(row => {
+        const idCell = row.querySelector('.id-cell');
+        if (idCell && idCell.textContent.includes('00248')) existingRow = row;
+      });
+
+      if (existingRow) {
+        // Actualizar estado a Pagada
+        const badgeCell = existingRow.querySelector('td:nth-child(5)');
+        const actionCell = existingRow.querySelector('td:last-child');
+        if (badgeCell) badgeCell.innerHTML = '<span class="status-badge badge-pagada">Pagada</span>';
+        if (actionCell) actionCell.innerHTML = `
+          <div style="display:flex;gap:6px;">
+            <button class="action-btn primary" onclick="showView('detalle')">Ver</button>
+            <button class="action-btn primary" style="background:var(--success);color:white;" onclick="showView('carga')">Cargar PDF</button>
+          </div>`;
+      } else {
+        // Agregar la nueva fila al principio de la tabla
+        const newRow = document.createElement('tr');
+        newRow.style.animation = 'fadeIn 0.4s ease';
+        newRow.style.background = 'rgba(5,150,105,0.05)';
+        newRow.innerHTML = `
+          <td><input type="checkbox"></td>
+          <td class="id-cell" style="color:var(--success);font-weight:700;">RDAM-2025-00248</td>
+          <td>
+            <div class="name-cell">${otpVerified ? otpDNIValue + ' Â· ' : ''}GarcÃ­a LÃ³pez, Carlos M.</div>
+            <div style="font-size:11px;color:var(--neutral-400);">${otpVerified ? otpEmailValue : 'nuevo.solicitante@email.com'}</div>
+          </td>
+          <td>Santa Fe</td>
+          <td><span class="status-badge badge-pagada">Pagada</span> <span style="font-size:10px;color:var(--success);font-weight:600;">âš¡ NUEVO</span></td>
+          <td class="date-cell">Ahora mismo</td>
+          <td style="font-size:12px;">Sin asignar</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button class="action-btn primary" onclick="showView('detalle')">Ver</button>
+              <button class="action-btn primary" style="background:var(--success);color:white;" onclick="showView('carga')">Cargar PDF</button>
+            </div>
+          </td>`;
+        tbody.insertBefore(newRow, tbody.firstChild);
+      }
+    }
+
+    // ===== FORZAR ESTADO (Supervisor) =====
+    function forzarEstado() {
+      const estado = document.getElementById('estadoDestino').value;
+      const motivo = document.getElementById('motivoForzado').value.trim();
+      if (!estado) { showToast('SeleccionÃ¡ un estado de destino', 'error'); return; }
+      if (!motivo) { showToast('El motivo es obligatorio', 'error'); return; }
+      closeModal('forzarEstadoModal');
+      showToast(`âš¡ Estado forzado a "${estado}". Registrado en auditorÃ­a.`, 'info');
+      document.getElementById('motivoForzado').value = '';
+      document.getElementById('estadoDestino').value = '';
+    }
+
+  </script>
+</body>
+
+</html>
+
+
+
