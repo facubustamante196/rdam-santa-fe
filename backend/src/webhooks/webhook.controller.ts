@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { WebhookService, WebhookPagoPayload } from './webhook.service';
+import { IncomingWebhookPagoPayload, WebhookService } from './webhook.service';
 
 @ApiTags('Webhooks')
 @Controller('webhooks')
@@ -45,7 +45,7 @@ export class WebhookController {
         }
 
         // 2. Procesar el webhook
-        const payload: WebhookPagoPayload = req.body;
+        const payload = req.body as IncomingWebhookPagoPayload;
         const ip = req.ip || req.socket.remoteAddress;
 
         return this.webhookService.procesarWebhook(payload, ip);

@@ -22,6 +22,7 @@ jest.mock('ioredis', () => {
 const mockEncryption = {
     blindIndex: jest.fn().mockReturnValue('hashed-dni'),
     hashOtp: jest.fn().mockImplementation((otp: string) => `hashed-${otp}`),
+    encrypt: jest.fn().mockImplementation((value: string) => `enc-${value}`),
 };
 
 const mockJwt = {

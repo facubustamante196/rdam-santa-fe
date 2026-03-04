@@ -284,7 +284,7 @@ Descargar certificado PDF (requiere que esté emitido y vigente).
 ## PAGO Y WEBHOOK
 
 ### POST /pagos/iniciar
-Iniciar proceso de pago. Crea la orden en la pasarela y retorna la URL de checkout.
+Iniciar proceso de pago. Crea una transacción `PENDIENTE` y retorna los campos que el frontend debe enviar por `POST` a la pasarela.
 
 **Auth:** JWT ciudadano (OTP)
 
@@ -299,11 +299,30 @@ Iniciar proceso de pago. Crea la orden en la pasarela y retorna la URL de checko
 ```json
 {
   "transaccion_id": "uuid",
-  "url_pago": "https://pasarela.externa.com/checkout/PAY-ABC-12345",
+  "url_pago": "http://localhost:3000",
   "monto": 2750.00,
-  "expira_en": 3600
+  "expira_en": 3600,
+  "metodo": "POST",
+  "checkout_fields": {
+    "Comercio": "test-merchant-001",
+    "TransaccionComercioId": "RDAM-2026-00247",
+    "Monto": "<base64-aes-cbc>",
+    "CallbackSuccess": "<base64-aes-cbc>",
+    "CallbackCancel": "<base64-aes-cbc>",
+    "UrlSuccess": "<base64-aes-cbc>",
+    "UrlError": "<base64-aes-cbc>",
+    "Informacion": "<base64-aes-cbc>",
+    "Producto[0]": "Certificado RDAM",
+    "MontoProducto[0]": "275000"
+  }
 }
 ```
+
+**Cómo debe redirigir el frontend al presionar "Pagar":**
+1. Llamar `POST /pagos/iniciar`.
+2. Construir un formulario HTML dinámico con `action=url_pago`, `method=POST`.
+3. Agregar todos los pares de `checkout_fields` como `input hidden`.
+4. Ejecutar `form.submit()` para abrir la pasarela.
 
 **Response 409 (estado inválido):**
 ```json
@@ -329,6 +348,19 @@ X-Pasarela-Signature: sha256=<hmac-sha256-hex>
   "monto": 2750.00,
   "metodo": "TARJETA_CREDITO",
   "timestamp": "2026-02-14T10:35:00Z"
+}
+```
+
+**Request (PlusPagos mock):**
+```json
+{
+  "Tipo": "PAGO",
+  "TransaccionPlataformaId": "123456",
+  "TransaccionComercioId": "RDAM-2026-00247",
+  "Monto": "2750.00",
+  "EstadoId": "3",
+  "Estado": "REALIZADA",
+  "FechaProcesamiento": "2026-02-14T10:35:00Z"
 }
 ```
 
