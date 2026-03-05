@@ -28,6 +28,7 @@ Ambos frontends consumen la misma API backend. El portal ciudadano requiere vali
 - **Email:** Nodemailer + SendGrid o AWS SES
 - **Auth:** JWT (jsonwebtoken) + bcrypt para passwords + Redis para sesiones OTP
 - **Cache / OTP:** Redis (TTL para tokens OTP)
+- **Anti-bot:** CAPTCHA validado server-side antes de emitir/reenviar OTP
 - **Scheduler:** node-cron o BullMQ para jobs de vencimiento
 - **Validación:** class-validator / zod
 - **Testing:** Jest + Supertest
@@ -235,11 +236,12 @@ S3_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
 S3_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 S3_REGION=us-east-1
 
-# Email
-EMAIL_PROVIDER=sendgrid
-SENDGRID_API_KEY=SG.xxx
+# Email (implementación actual: Nodemailer sobre SMTP)
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=user@example.com
+EMAIL_PASS=password
 EMAIL_FROM=noreply@rdam.justiciasantafe.gov.ar
-EMAIL_TEMPLATE_EMISION=d-xxxxxxxxx
 
 # Pasarela de pago
 PASARELA_API_URL=https://pasarela.proveedor.com
@@ -260,6 +262,11 @@ SLA_CRITICAL_HOURS=48
 OTP_TTL_SECONDS=600
 OTP_MAX_INTENTOS=3
 REDIS_URL=redis://localhost:6379
+
+# CAPTCHA
+CAPTCHA_ENABLED=true
+CAPTCHA_SECRET_KEY=secret-del-proveedor-captcha
+CAPTCHA_MIN_SCORE=0.5
 
 # Cron Jobs
 CRON_SCHEDULE_VENCIMIENTOS="0 0 * * *"

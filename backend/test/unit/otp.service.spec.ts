@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { OtpService } from '../../src/otp/otp.service';
 import { EncryptionService } from '../../src/encryption/encryption.service';
+import { EmailService } from '../../src/email/email.service';
 
 const mockRedis = {
     set: jest.fn(),
@@ -29,6 +30,10 @@ const mockJwt = {
     sign: jest.fn().mockReturnValue('mock-token'),
 };
 
+const mockEmailService = {
+    enviarOtp: jest.fn(),
+};
+
 const mockConfig = {
     get: jest.fn().mockImplementation((key: string, defaultVal?: unknown) => {
         const config: Record<string, unknown> = {
@@ -37,6 +42,9 @@ const mockConfig = {
             OTP_MAX_INTENTOS: 3,
             OTP_JWT_SECRET: 'test-secret',
             OTP_JWT_EXPIRES_IN: '30m',
+            CAPTCHA_ENABLED: 'true',
+            CAPTCHA_SECRET_KEY: 'captcha-secret',
+            CAPTCHA_MIN_SCORE: '0.5',
             NODE_ENV: 'development',
         };
         return key in config ? config[key] : defaultVal;
@@ -53,10 +61,16 @@ describe('OtpService', () => {
                 { provide: ConfigService, useValue: mockConfig },
                 { provide: JwtService, useValue: mockJwt },
                 { provide: EncryptionService, useValue: mockEncryption },
+                { provide: EmailService, useValue: mockEmailService },
             ],
         }).compile();
 
         service = module.get<OtpService>(OtpService);
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ success: true, score: 0.9 }),
+        } as Response);
+        mockEmailService.enviarOtp.mockResolvedValue({ messageId: 'dev-mode' });
         jest.clearAllMocks();
     });
 
@@ -64,12 +78,34 @@ describe('OtpService', () => {
         it('genera OTP y lo almacena en Redis', async () => {
             mockRedis.set.mockResolvedValue('OK');
 
-            const result = await service.solicitar('12345678', 'test@email.com');
+            const result = await service.solicitar(
+                '12345678',
+                'test@email.com',
+                'captcha-token-ok',
+                '127.0.0.1',
+            );
 
             expect(result.message).toContain('OTP enviado');
             expect(result.expires_in).toBe(300);
             expect(result._dev_otp).toBeDefined();
+            expect(global.fetch).toHaveBeenCalled();
+            expect(mockEmailService.enviarOtp).toHaveBeenCalledWith(
+                'test@email.com',
+                expect.any(String),
+                5,
+            );
             expect(mockRedis.set).toHaveBeenCalled();
+        });
+
+        it('rechaza si CAPTCHA es inválido', async () => {
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ success: false, 'error-codes': ['invalid-input-response'] }),
+            } as Response);
+
+            await expect(
+                service.solicitar('12345678', 'test@email.com', 'captcha-token-bad'),
+            ).rejects.toThrow(BadRequestException);
         });
     });
 
@@ -141,7 +177,11 @@ describe('OtpService', () => {
             mockRedis.del.mockResolvedValue(1);
             mockRedis.set.mockResolvedValue('OK');
 
-            const result = await service.reenviar('12345678', 'test@email.com');
+            const result = await service.reenviar(
+                '12345678',
+                'test@email.com',
+                'captcha-token-ok',
+            );
 
             expect(result.message).toContain('OTP enviado');
             expect(mockRedis.del).toHaveBeenCalled();

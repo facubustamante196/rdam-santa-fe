@@ -14,21 +14,22 @@
 ## AUTENTICACIÓN CIUDADANO (OTP)
 
 ### POST /auth/otp/solicitar
-Solicitar código OTP. Envía un código de 6 dígitos al email del ciudadano.
+Solicitar código OTP. Requiere CAPTCHA válido y envía un código de 6 dígitos al email del ciudadano.
 
 **Request:**
 ```json
 {
   "dni": "30456789",
-  "email": "jgarcia@email.com"
+  "email": "jgarcia@email.com",
+  "captchaToken": "token-del-proveedor-captcha"
 }
 ```
 
 **Response 200:**
 ```json
 {
-  "mensaje": "Código enviado al email registrado. Válido por 10 minutos.",
-  "expira_en": 600
+  "message": "Código OTP enviado a su email",
+  "expires_in": 600
 }
 ```
 
@@ -55,39 +56,55 @@ Validar el código OTP recibido. Retorna un JWT de sesión ciudadano.
 ```json
 {
   "access_token": "eyJhbGci...",
-  "expires_in": 1800,
-  "dni_hash": "7f9a2c1...",
-  "intentos_restantes": null
+  "message": "OTP validado exitosamente",
+  "expires_in": "30m"
 }
 ```
 
-**Response 401 (código inválido):**
+**Response 400 (código inválido):**
 ```json
 {
-  "error": "OTP_INVALIDO",
-  "message": "Código incorrecto.",
-  "intentos_restantes": 2
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "Código OTP incorrecto. Le quedan 2 intento(s)."
 }
 ```
 
-**Response 410 (expirado o agotado):**
+**Response 410 (máximo de intentos alcanzado):**
 ```json
-{ "error": "OTP_EXPIRADO", "message": "El código expiró o se agotaron los intentos. Solicitá uno nuevo." }
+{
+  "statusCode": 410,
+  "error": "Gone",
+  "message": "Máximo de intentos alcanzado. Solicite un nuevo código OTP."
+}
+```
+
+**Response 400 (OTP expirado o inexistente):**
+```json
+{
+  "statusCode": 400,
+  "error": "Bad Request",
+  "message": "No existe un OTP activo para este DNI. Solicite uno nuevo."
+}
 ```
 
 ---
 
 ### POST /auth/otp/reenviar
-Reenviar un nuevo OTP (invalida el anterior).
+Reenviar un nuevo OTP (invalida el anterior). Requiere CAPTCHA válido.
 
 **Request:**
 ```json
-{ "dni": "30456789", "email": "jgarcia@email.com" }
+{
+  "dni": "30456789",
+  "email": "jgarcia@email.com",
+  "captchaToken": "token-del-proveedor-captcha"
+}
 ```
 
 **Response 200:**
 ```json
-{ "mensaje": "Nuevo código enviado.", "expira_en": 600 }
+{ "message": "Código OTP enviado a su email", "expires_in": 600 }
 ```
 
 ---

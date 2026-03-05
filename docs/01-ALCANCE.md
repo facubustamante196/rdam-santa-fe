@@ -51,10 +51,11 @@ La solución se compone de tres capas principales:
 | Paso | Acción | Regla de Negocio |
 |------|--------|-----------------|
 | 1 | Ciudadano ingresa **DNI** y **Email** | Son los únicos datos requeridos para iniciar |
-| 2 | Sistema envía un código **OTP de 6 dígitos** al email ingresado | El OTP expira en **10 minutos** |
-| 3 | Ciudadano ingresa el código OTP en la pantalla de verificación | Máximo 3 intentos antes de requerir reenvío |
-| 4 | Sistema valida el OTP | ⛔ El formulario de solicitud está **bloqueado** hasta este paso |
-| 5 | Acceso habilitado al formulario de solicitud | El DNI queda pre-completado y no es editable |
+| 2 | Ciudadano completa desafío **CAPTCHA** ("No soy un robot") | Sin CAPTCHA válido no se envía OTP |
+| 3 | Sistema envía un código **OTP de 6 dígitos** al email ingresado | El OTP expira en **10 minutos** |
+| 4 | Ciudadano ingresa el código OTP en la pantalla de verificación | Máximo 3 intentos antes de requerir reenvío |
+| 5 | Sistema valida el OTP | ⛔ El formulario de solicitud está **bloqueado** hasta este paso |
+| 6 | Acceso habilitado al formulario de solicitud | El DNI queda pre-completado y no es editable |
 
 > **🔒 REGLA CRÍTICA:** El acceso al formulario de solicitud requiere OTP validado exitosamente. No existe vía alternativa de acceso.
 

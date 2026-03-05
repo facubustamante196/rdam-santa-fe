@@ -74,7 +74,7 @@ El flujo es: **OTP → Solicitud → Pago (vía Webhook) → Emisión interna �
 
 | ID | Historia | Criterios de Aceptación |
 |----|----------|------------------------|
-| HU-C01 | Como ciudadano, quiero identificarme con mi DNI y Email para acceder al formulario | • Pantalla con campos DNI + Email • Sistema envía OTP al email ingresado • OTP expira en 10 minutos • Máximo 3 intentos antes de requerir reenvío • El formulario está bloqueado hasta el OTP ser validado |
+| HU-C01 | Como ciudadano, quiero identificarme con mi DNI y Email para acceder al formulario | • Pantalla con campos DNI + Email + CAPTCHA • CAPTCHA obligatorio antes de solicitar OTP • Sistema envía OTP al email ingresado • OTP expira en 10 minutos • Máximo 3 intentos antes de requerir reenvío • El formulario está bloqueado hasta el OTP ser validado |
 | HU-C02 | Como ciudadano, quiero completar un formulario con mis datos para iniciar la solicitud | • Campos: DNI (pre-llenado, no editable), nombre completo, fecha nacimiento, email, circunscripción • Validación de formato en tiempo real • DNI/CUIL encriptados antes de guardar en backend • Al enviar: solicitud creada en `PENDIENTE_PAGO` + redirigido a pasarela |
 | HU-C03 | Como ciudadano, quiero pagar mi solicitud para que sea procesada | • Al enviar formulario se redirige inmediatamente a pasarela de pago • Solo el Webhook de la pasarela cambia el estado (`PAGADA` o `RECHAZADA`) • El ciudadano NO puede alterar el estado directamente |
 | HU-C04 | Como ciudadano, quiero consultar el estado de mi solicitud sin tener cuenta | • Búsqueda por código de solicitud o DNI+Email • Se muestra estado actual y timeline con fechas • Los datos sensibles se muestran enmascarados |
@@ -355,9 +355,9 @@ CREATE TRIGGER trigger_set_issued_dates
 
 | Endpoint | Descripción |
 |----------|-------------|
-| `POST /auth/otp/solicitar` | Recibe DNI + Email, genera OTP (6 dígitos), guarda en Redis con TTL 10min, envía email |
+| `POST /auth/otp/solicitar` | Recibe DNI + Email + `captchaToken`, valida CAPTCHA en backend, genera OTP (6 dígitos), guarda en Redis con TTL 10min y envía email |
 | `POST /auth/otp/validar` | Recibe DNI + Email + código OTP, valida contra Redis, retorna JWT de sesión ciudadano (30min) |
-| `POST /auth/otp/reenviar` | Reenvía un OTP nuevo (invalida el anterior) |
+| `POST /auth/otp/reenviar` | Reenvía un OTP nuevo (invalida el anterior). Requiere `captchaToken` válido |
 
 ### 7.2 Pasarela de Pago (Webhook)
 
@@ -421,6 +421,7 @@ CREATE TRIGGER trigger_set_issued_dates
 - JWT ciudadano (OTP session): expiración 30 minutos, uso único
 - JWT interno (operario/supervisor): expiración 8h + refresh token 24h
 - OTP: máximo 3 intentos, TTL 10 minutos, invalidación tras uso exitoso
+- CAPTCHA: validación server-side del token antes de emitir/reenviar OTP
 - Rate limiting: 5 req/min por IP en `POST /auth/otp/solicitar`; 10 req/min en `POST /solicitudes`
 - Validación de tipo MIME en upload de PDF (no solo extensión)
 - Webhook: validar `X-Pasarela-Signature` con HMAC-SHA256 antes de procesar

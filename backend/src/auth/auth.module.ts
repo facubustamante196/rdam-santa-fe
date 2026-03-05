@@ -15,7 +15,15 @@ import { UsuarioEntity } from '../database/entities';
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET', 'dev-secret'),
+                secret: (() => {
+                    const jwtSecret = configService.get<string>('JWT_SECRET');
+                    if (!jwtSecret) {
+                        throw new Error(
+                            'JWT_SECRET no configurado. Defina la variable de entorno.',
+                        );
+                    }
+                    return jwtSecret;
+                })(),
                 signOptions: {
                     expiresIn: configService.get<string>('JWT_EXPIRES_IN', '8h'),
                 },

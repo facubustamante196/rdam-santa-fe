@@ -13,20 +13,16 @@ export class EncryptionService {
     private readonly hashSalt: string;
 
     constructor(private readonly configService: ConfigService) {
-        const keyHex = this.configService.get<string>('ENCRYPTION_KEY', '');
+        const keyHex = this.requireConfig('ENCRYPTION_KEY');
         this.encryptionKey = Buffer.from(keyHex, 'hex');
 
         if (this.encryptionKey.length !== 32) {
-            console.warn(
-                '⚠️  ENCRYPTION_KEY debe ser de 32 bytes (64 chars hex). Usando clave de desarrollo.',
+            throw new Error(
+                'ENCRYPTION_KEY inválida: debe ser de 32 bytes (64 caracteres hex).',
             );
-            this.encryptionKey = Buffer.alloc(32, 0);
         }
 
-        this.hashSalt = this.configService.get<string>(
-            'DNI_HASH_SALT',
-            'dev-salt',
-        );
+        this.hashSalt = this.requireConfig('DNI_HASH_SALT');
     }
 
     /**
@@ -77,5 +73,13 @@ export class EncryptionService {
      */
     hashOtp(otp: string): string {
         return createHash('sha256').update(otp).digest('hex');
+    }
+
+    private requireConfig(key: string): string {
+        const value = this.configService.get<string>(key);
+        if (!value) {
+            throw new Error(`${key} no configurado. Defina la variable de entorno.`);
+        }
+        return value;
     }
 }

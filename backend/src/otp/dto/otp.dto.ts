@@ -8,6 +8,12 @@ export class SolicitarOtpDto {
 
     @IsEmail({}, { message: 'Email inválido' })
     email!: string;
+
+    @IsString()
+    @Length(20, 5000, {
+        message: 'Token CAPTCHA inválido',
+    })
+    captchaToken!: string;
 }
 
 export class ValidarOtpDto {
@@ -33,4 +39,10 @@ export class ReenviarOtpDto {
 
     @IsEmail()
     email!: string;
+
+    @IsString()
+    @Length(20, 5000, {
+        message: 'Token CAPTCHA inválido',
+    })
+    captchaToken!: string;
 }

@@ -1,5 +1,6 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 import { OtpService } from './otp.service';
 import {
     SolicitarOtpDto,
@@ -13,8 +14,13 @@ export class OtpController {
     constructor(private readonly otpService: OtpService) { }
 
     @Post('solicitar')
-    async solicitar(@Body() dto: SolicitarOtpDto) {
-        return this.otpService.solicitar(dto.dni, dto.email);
+    async solicitar(@Body() dto: SolicitarOtpDto, @Req() req: Request) {
+        return this.otpService.solicitar(
+            dto.dni,
+            dto.email,
+            dto.captchaToken,
+            req.ip,
+        );
     }
 
     @Post('validar')
@@ -23,7 +29,12 @@ export class OtpController {
     }
 
     @Post('reenviar')
-    async reenviar(@Body() dto: ReenviarOtpDto) {
-        return this.otpService.reenviar(dto.dni, dto.email);
+    async reenviar(@Body() dto: ReenviarOtpDto, @Req() req: Request) {
+        return this.otpService.reenviar(
+            dto.dni,
+            dto.email,
+            dto.captchaToken,
+            req.ip,
+        );
     }
 }

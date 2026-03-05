@@ -29,13 +29,15 @@ export class EmisionService {
     ) {
         this.solicitudesRepository = dataSource.getRepository(SolicitudEntity);
         this.bucket = this.configService.get<string>('S3_BUCKET', 'rdam-documents');
+        const accessKeyId = this.requireConfig('S3_ACCESS_KEY');
+        const secretAccessKey = this.requireConfig('S3_SECRET_KEY');
 
         this.s3Client = new S3Client({
             endpoint: this.configService.get<string>('S3_ENDPOINT', 'http://localhost:9000'),
             region: this.configService.get<string>('S3_REGION', 'us-east-1'),
             credentials: {
-                accessKeyId: this.configService.get<string>('S3_ACCESS_KEY', 'minioadmin'),
-                secretAccessKey: this.configService.get<string>('S3_SECRET_KEY', 'minioadmin'),
+                accessKeyId,
+                secretAccessKey,
             },
             forcePathStyle: true,
         });
@@ -147,5 +149,13 @@ export class EmisionService {
             expires_in: 900,
             codigo: solicitud.codigo,
         };
+    }
+
+    private requireConfig(key: string): string {
+        const value = this.configService.get<string>(key);
+        if (!value) {
+            throw new Error(`${key} no configurado. Defina la variable de entorno.`);
+        }
+        return value;
     }
 }

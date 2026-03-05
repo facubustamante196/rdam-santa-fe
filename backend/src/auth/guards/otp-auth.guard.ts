@@ -31,11 +31,15 @@ export class OtpAuthGuard implements CanActivate {
         }
 
         try {
+            const otpJwtSecret = this.configService.get<string>('OTP_JWT_SECRET');
+            if (!otpJwtSecret) {
+                throw new UnauthorizedException(
+                    'OTP_JWT_SECRET no configurado en servidor',
+                );
+            }
+
             const payload = await this.jwtService.verifyAsync<OtpJwtPayload>(token, {
-                secret: this.configService.get<string>(
-                    'OTP_JWT_SECRET',
-                    'dev-otp-secret',
-                ),
+                secret: otpJwtSecret,
             });
 
             if (payload.tipo !== 'ciudadano') {

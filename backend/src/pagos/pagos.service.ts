@@ -33,14 +33,8 @@ export class PagosService {
             'PASARELA_API_URL',
             'http://localhost:3000',
         );
-        this.merchantGuid = this.configService.get<string>(
-            'PASARELA_MERCHANT_GUID',
-            'test-merchant-001',
-        );
-        this.secretKey = this.configService.get<string>(
-            'PASARELA_SECRET_KEY',
-            'clave-secreta-campus-2026',
-        );
+        this.merchantGuid = this.requireConfig('PASARELA_MERCHANT_GUID');
+        this.secretKey = this.requireConfig('PASARELA_SECRET_KEY');
         this.frontendBaseUrl = this.configService.get<string>(
             'FRONTEND_URL',
             'http://localhost:3002',
@@ -141,5 +135,13 @@ export class PagosService {
             cipher.final(),
         ]);
         return Buffer.concat([iv, encrypted]).toString('base64');
+    }
+
+    private requireConfig(key: string): string {
+        const value = this.configService.get<string>(key);
+        if (!value) {
+            throw new Error(`${key} no configurado. Defina la variable de entorno.`);
+        }
+        return value;
     }
 }
