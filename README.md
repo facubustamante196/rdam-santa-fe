@@ -10,7 +10,9 @@ Sistema web para gestion digital de certificados del Registro de Deudores Alimen
 
 ## Estructura del Proyecto
 
-- `apps/` - Aplicaciones (API, Portal, Backoffice)
+- `Backend/` - API en NestJS
+- `Frontend/ciudadano/` - Portal ciudadano (Next.js)
+- `Frontend/operario/` - Backoffice operario (Next.js)
 - `docs/` - Documentacion del proyecto
 - `infrastructure/` - Configuracion de despliegue (Docker, K8s)
 - `poc/` - Pruebas de concepto

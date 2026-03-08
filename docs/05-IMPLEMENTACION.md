@@ -353,17 +353,17 @@ services:
     volumes: ['miniodata:/data']
 
   api:
-    build: ./apps/api
+    build: ./Backend
     ports: ['3001:3000']
     depends_on: [db, redis, minio]
     env_file: .env
 
   portal:
-    build: ./apps/portal
+    build: ./Frontend/ciudadano
     ports: ['3002:3000']
 
   backoffice:
-    build: ./apps/backoffice
+    build: ./Frontend/operario
     ports: ['3003:3000']
 
 volumes:

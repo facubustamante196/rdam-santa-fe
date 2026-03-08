@@ -14,16 +14,16 @@ fi
 
 # Setup API
 echo "🛠️ Setting up API..."
-cd apps/api
+cd Backend
 if [ ! -f .env ]; then
   cp .env.example .env
 fi
 # npm install
-cd ../..
+cd ..
 
 # Setup Portal
 echo "🛠️ Setting up Portal..."
-cd apps/portal
+cd Frontend/ciudadano
 if [ ! -f .env ]; then
   cp .env.example .env.local
 fi
@@ -32,7 +32,7 @@ cd ../..
 
 # Setup Backoffice
 echo "🛠️ Setting up Backoffice..."
-cd apps/backoffice
+cd Frontend/operario
 if [ ! -f .env ]; then
   cp .env.example .env.local
 fi
