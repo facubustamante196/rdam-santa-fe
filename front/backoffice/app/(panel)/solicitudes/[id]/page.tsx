@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -15,18 +15,25 @@ import {
   RechazarSolicitudValues,
 } from "@/lib/schemas";
 import { SolicitudDetail } from "@/components/solicitudes/SolicitudDetail";
+import { AsignarOperarioModal } from "@/components/solicitudes/AsignarOperarioModal";
+import { CambiarEstadoModal } from "@/components/solicitudes/CambiarEstadoModal";
+import { UploadPdfButton } from "@/components/solicitudes/UploadPdfButton";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
 
 export default function Page() {
   const params = useParams<{ id: string }>();
-  const { can } = usePermissions();
+  const { can, canAsignarOperario, canCambiarEstado } = usePermissions();
   const { data: session } = useSession();
   const token = session?.accessToken;
+  const queryClient = useQueryClient();
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [stateOpen, setStateOpen] = useState(false);
   const {
     data: solicitud,
     isLoading,
@@ -74,6 +81,37 @@ export default function Page() {
   return (
     <div className="space-y-6">
       <SolicitudDetail solicitud={solicitud} />
+
+      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 className="text-sm font-semibold text-slate-900">Acciones</h3>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <UploadPdfButton
+            solicitudId={solicitud.id}
+            estadoSolicitud={solicitud.estado}
+            onSuccess={() =>
+              queryClient.invalidateQueries({ queryKey: ["solicitud", params.id] })
+            }
+          />
+          {canAsignarOperario ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setAssignOpen(true)}
+            >
+              Asignar operario
+            </Button>
+          ) : null}
+          {canCambiarEstado ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStateOpen(true)}
+            >
+              Cambiar estado
+            </Button>
+          ) : null}
+        </div>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -135,6 +173,19 @@ export default function Page() {
         </div>
       </div>
 
+      <AsignarOperarioModal
+        isOpen={assignOpen}
+        onClose={() => setAssignOpen(false)}
+        solicitudId={solicitud.id}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["solicitud", params.id] })}
+      />
+      <CambiarEstadoModal
+        isOpen={stateOpen}
+        onClose={() => setStateOpen(false)}
+        solicitudId={solicitud.id}
+        estadoActual={solicitud.estado}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["solicitud", params.id] })}
+      />
     </div>
   );
 }

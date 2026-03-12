@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchSolicitudes } from "@/lib/api";
 import { SolicitudFilters } from "@/components/solicitudes/SolicitudFilters";
 import { SolicitudesTable } from "@/components/solicitudes/SolicitudesTable";
+import { AsignarOperarioModal } from "@/components/solicitudes/AsignarOperarioModal";
+import { CambiarEstadoModal } from "@/components/solicitudes/CambiarEstadoModal";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSession } from "next-auth/react";
 import type { EstadoSolicitud } from "@/types";
+import type { SolicitudListItem } from "@/lib/schemas";
 
 type FiltersState = {
   estado: EstadoSolicitud | "";
@@ -26,13 +29,18 @@ const EMPTY_FILTERS: FiltersState = {
 };
 
 export default function Page() {
-  const { can } = usePermissions();
+  const { can, canAsignarOperario, canCambiarEstado } = usePermissions();
   const { data: session } = useSession();
   const token = session?.accessToken;
   const userCircunscripcion = session?.user?.circunscripcion ?? "";
   const [filters, setFilters] = useState<FiltersState>(EMPTY_FILTERS);
   const [appliedFilters, setAppliedFilters] =
     useState<FiltersState>(EMPTY_FILTERS);
+  const [selectedSolicitud, setSelectedSolicitud] =
+    useState<SolicitudListItem | null>(null);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [stateOpen, setStateOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const canFilterCircunscripcion = can("view:all_solicitudes");
 
@@ -77,7 +85,42 @@ export default function Page() {
         onApply={() => setAppliedFilters(filters)}
         fixedCircunscripcion={canFilterCircunscripcion ? "" : userCircunscripcion}
       />
-      <SolicitudesTable solicitudes={solicitudes.data} />
+      <SolicitudesTable
+        solicitudes={solicitudes.data}
+        onAssign={
+          canAsignarOperario
+            ? (item) => {
+                setSelectedSolicitud(item);
+                setAssignOpen(true);
+              }
+            : undefined
+        }
+        onChangeState={
+          canCambiarEstado
+            ? (item) => {
+                setSelectedSolicitud(item);
+                setStateOpen(true);
+              }
+            : undefined
+        }
+      />
+      {selectedSolicitud ? (
+        <>
+          <AsignarOperarioModal
+            isOpen={assignOpen}
+            onClose={() => setAssignOpen(false)}
+            solicitudId={selectedSolicitud.id}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ["solicitudes"] })}
+          />
+          <CambiarEstadoModal
+            isOpen={stateOpen}
+            onClose={() => setStateOpen(false)}
+            solicitudId={selectedSolicitud.id}
+            estadoActual={selectedSolicitud.estado}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ["solicitudes"] })}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
