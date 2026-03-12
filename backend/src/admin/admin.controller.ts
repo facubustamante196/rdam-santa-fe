@@ -42,8 +42,8 @@ export class AdminController {
      * Lista paginada con filtros. Operario y Supervisor.
      */
     @Get()
-    async listar(@Query() query: ListarSolicitudesQueryDto) {
-        return this.adminService.listarSolicitudes(query);
+    async listar(@Query() query: ListarSolicitudesQueryDto, @Req() req: Request) {
+        return this.adminService.listarSolicitudes(query, (req as any).user);
     }
 
     /**

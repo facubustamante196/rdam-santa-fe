@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DashboardService, DashboardStats } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -19,10 +19,17 @@ export class DashboardController {
      * Opcionalmente filtrar por circunscripción.
      */
     @Get()
-    @Roles(RolUsuario.SUPERVISOR)
+    @Roles(RolUsuario.SUPERVISOR, RolUsuario.OPERARIO)
     async stats(
         @Query('circunscripcion') circunscripcion?: Circunscripcion,
+        @Req() req?: any,
     ): Promise<DashboardStats> {
-        return this.dashboardService.obtenerStats(circunscripcion);
+        const user = req?.user;
+        const filtro =
+            user?.rol === RolUsuario.OPERARIO
+                ? user.circunscripcion
+                : circunscripcion;
+
+        return this.dashboardService.obtenerStats(filtro);
     }
 }

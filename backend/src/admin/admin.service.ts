@@ -42,16 +42,20 @@ export class AdminService {
         this.transaccionesRepository = dataSource.getRepository(TransaccionPagoEntity);
     }
 
-    async listarSolicitudes(query: ListarSolicitudesQuery) {
+    async listarSolicitudes(
+        query: ListarSolicitudesQuery,
+        user: { rol: string; circunscripcion: string },
+    ) {
         const page = query.page || 1;
         const limit = query.limit || 20;
         const skip = (page - 1) * limit;
 
         const where: FindOptionsWhere<SolicitudEntity> = {};
         if (query.estado) where.estado = query.estado;
-        if (query.circunscripcion) where.circunscripcion = query.circunscripcion;
+        const circunscripcion =
+            user.rol === RolUsuario.OPERARIO ? user.circunscripcion : query.circunscripcion;
+        if (circunscripcion) where.circunscripcion = circunscripcion;
         if (query.dni) where.dniHash = this.encryptionService.blindIndex(query.dni);
-        if (query.operario_id) where.operarioAsignadoId = query.operario_id;
 
         if (query.fecha_desde && query.fecha_hasta) {
             where.createdAt = Between(
@@ -93,6 +97,24 @@ export class AdminService {
                 limit,
                 totalPages: Math.ceil(total / limit),
             },
+        };
+    }
+
+    async listarUsuarios() {
+        const usuarios = await this.usuariosRepository.find({
+            where: { rol: RolUsuario.OPERARIO },
+            order: { nombreCompleto: 'ASC' },
+        });
+
+        return {
+            operarios: usuarios.map((usuario) => ({
+                id: usuario.id,
+                username: usuario.username,
+                nombreCompleto: usuario.nombreCompleto,
+                rol: usuario.rol,
+                circunscripcion: usuario.circunscripcion,
+                activo: usuario.activo,
+            })),
         };
     }
 

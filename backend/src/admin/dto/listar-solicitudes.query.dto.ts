@@ -34,10 +34,6 @@ export class ListarSolicitudesQueryDto {
     dni?: string;
 
     @IsOptional()
-    @IsString()
-    operario_id?: string;
-
-    @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
