@@ -4,6 +4,7 @@ export type Action =
   | "view:dashboard"
   | "view:equipo"
   | "view:all_solicitudes"
+  | "assign:solicitud"
   | "force:estado"
   | "manage:operarios"
   | "upload:pdf"

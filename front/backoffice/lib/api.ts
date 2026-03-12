@@ -166,3 +166,65 @@ export async function fetchOperarios(token: string): Promise<OperariosResponse> 
     throw new ApiError(500, "Respuesta invalida", error);
   }
 }
+
+export async function asignarOperario(params: {
+  token: string;
+  solicitudId: string;
+  operarioId: string;
+}) {
+  return request({
+    token: params.token,
+    schema: { parse: (value: unknown) => value },
+    path: `/admin/solicitudes/${params.solicitudId}/asignar`,
+    method: "PATCH",
+    body: {
+      operario_id: params.operarioId,
+    },
+  });
+}
+
+export async function cambiarEstado(params: {
+  token: string;
+  solicitudId: string;
+  estado: EstadoSolicitud;
+}) {
+  return request({
+    token: params.token,
+    schema: { parse: (value: unknown) => value },
+    path: `/admin/solicitudes/${params.solicitudId}/estado`,
+    method: "PATCH",
+    body: {
+      estado: params.estado,
+    },
+  });
+}
+
+export async function uploadPdf(params: {
+  token: string;
+  solicitudId: string;
+  file: File;
+}) {
+  const base = new URL(API_BASE_URL);
+  const finalUrl = new URL(
+    `/admin/solicitudes/${params.solicitudId}/pdf`,
+    base.toString(),
+  );
+
+  const formData = new FormData();
+  formData.append("archivo", params.file);
+
+  const response = await fetch(finalUrl.toString(), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${params.token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new ApiError(response.status, text || "API error");
+  }
+
+  return (await response.json()) as unknown;
+}

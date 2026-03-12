@@ -13,5 +13,7 @@ export function usePermissions() {
   return {
     role,
     can,
+    canAsignarOperario: can("assign:solicitud"),
+    canCambiarEstado: can("force:estado"),
   };
 }
