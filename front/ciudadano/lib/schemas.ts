@@ -59,7 +59,6 @@ export const OtpSolicitarResponseSchema = z.object({
 });
 
 export const OtpValidarResponseSchema = z.object({
-  access_token: z.string(),
   message: z.string(),
   expires_in: z.string(),
 });

@@ -13,11 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
-type SolicitudFormProps = {
-  token: string;
-};
-
-export function SolicitudForm({ token }: SolicitudFormProps) {
+export function SolicitudForm() {
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<SolicitudFormValues>({
     resolver: zodResolver(SolicitudFormSchema),
@@ -31,7 +27,7 @@ export function SolicitudForm({ token }: SolicitudFormProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: SolicitudFormValues) => crearSolicitud(token, values),
+    mutationFn: (values: SolicitudFormValues) => crearSolicitud(values),
     onSuccess: (data) => {
       setMessage(data.mensaje);
       if (typeof window !== "undefined") {

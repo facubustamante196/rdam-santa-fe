@@ -4,19 +4,14 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { descargarSolicitud, historialSolicitudes } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
-type HistorialListProps = {
-  token: string;
-};
-
-export function HistorialList({ token }: HistorialListProps) {
+export function HistorialList() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["historial"],
-    queryFn: () => historialSolicitudes(token),
-    enabled: !!token,
+    queryFn: () => historialSolicitudes(),
   });
 
   const downloadMutation = useMutation({
-    mutationFn: (codigo: string) => descargarSolicitud(token, codigo),
+    mutationFn: (codigo: string) => descargarSolicitud(codigo),
     onSuccess: (url) => {
       if (typeof window !== "undefined") {
         window.location.href = url;

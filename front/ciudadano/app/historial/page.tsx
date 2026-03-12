@@ -1,15 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { OtpRequestForm } from "@/components/forms/OtpRequestForm";
 import { OtpValidateForm } from "@/components/forms/OtpValidateForm";
 import { HistorialList } from "@/components/forms/HistorialList";
 import { useOtpSession } from "@/store/useOtpSession";
 import type { OtpSolicitarFormValues } from "@/lib/schemas";
+import { checkOtpSession } from "@/lib/api";
 
 export default function Page() {
-  const token = useOtpSession((state) => state.token);
+  const validated = useOtpSession((state) => state.validated);
+  const setValidated = useOtpSession((state) => state.setValidated);
   const [otpData, setOtpData] = useState<OtpSolicitarFormValues | null>(null);
+
+  useEffect(() => {
+    checkOtpSession()
+      .then((data) => {
+        if (data.authenticated) {
+          setValidated(true);
+        }
+      })
+      .catch(() => {});
+  }, [setValidated]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_1.6fr]">
@@ -39,8 +51,8 @@ export default function Page() {
           Descarga certificados vigentes desde esta lista.
         </p>
         <div className="mt-4">
-          {token ? (
-            <HistorialList token={token} />
+          {validated ? (
+            <HistorialList />
           ) : (
             <p className="text-sm text-slate-500">
               Valida el OTP para habilitar el historial.

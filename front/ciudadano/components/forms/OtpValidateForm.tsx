@@ -23,7 +23,7 @@ export function OtpValidateForm({
   onSuccess,
 }: OtpValidateFormProps) {
   const [message, setMessage] = useState<string | null>(null);
-  const setToken = useOtpSession((state) => state.setToken);
+  const setValidated = useOtpSession((state) => state.setValidated);
   const form = useForm<OtpValidarFormValues>({
     resolver: zodResolver(OtpValidarFormSchema),
     defaultValues: {
@@ -35,8 +35,8 @@ export function OtpValidateForm({
 
   const mutation = useMutation({
     mutationFn: validarOtp,
-    onSuccess: (data) => {
-      setToken(data.access_token);
+    onSuccess: () => {
+      setValidated(true);
       setMessage("OTP validado. Ya podes continuar.");
       onSuccess?.();
     },

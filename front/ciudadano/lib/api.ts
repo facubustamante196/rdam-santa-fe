@@ -17,16 +17,12 @@ import type {
   SolicitudFormValues,
 } from "@/lib/schemas";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
-
 type RequestOptions<T> = {
   schema: { parse: (data: unknown) => T };
   path: string;
   method?: "GET" | "POST";
   body?: unknown;
   query?: Record<string, string | number | undefined | null>;
-  token?: string | null;
 };
 
 export class ApiError extends Error {
@@ -46,11 +42,9 @@ async function request<T>({
   method = "GET",
   body,
   query,
-  token,
 }: RequestOptions<T>): Promise<T> {
-  const base = new URL(API_BASE_URL);
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const finalUrl = new URL(normalizedPath, base.toString());
+  const finalUrl = new URL(normalizedPath, "http://localhost");
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined && value !== null && value !== "") {
@@ -59,11 +53,10 @@ async function request<T>({
     }
   }
 
-  const response = await fetch(finalUrl.toString(), {
+  const response = await fetch(finalUrl.toString().replace("http://localhost", ""), {
     method,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -86,7 +79,7 @@ export function solicitarOtp(
 ): Promise<OtpSolicitarResponse> {
   return request({
     schema: OtpSolicitarResponseSchema,
-    path: "/auth/otp/solicitar",
+    path: "/api/otp/solicitar",
     method: "POST",
     body: data,
   });
@@ -97,7 +90,7 @@ export function reenviarOtp(
 ): Promise<OtpSolicitarResponse> {
   return request({
     schema: OtpSolicitarResponseSchema,
-    path: "/auth/otp/reenviar",
+    path: "/api/otp/reenviar",
     method: "POST",
     body: data,
   });
@@ -108,19 +101,18 @@ export function validarOtp(
 ): Promise<OtpValidarResponse> {
   return request({
     schema: OtpValidarResponseSchema,
-    path: "/auth/otp/validar",
+    path: "/api/otp/validar",
     method: "POST",
     body: data,
   });
 }
 
 export function crearSolicitud(
-  token: string,
   data: SolicitudFormValues,
 ): Promise<SolicitudCrearResponse> {
   return request({
     schema: SolicitudCrearResponseSchema,
-    path: "/solicitudes",
+    path: "/api/solicitudes",
     method: "POST",
     body: {
       cuil: data.cuil,
@@ -129,7 +121,6 @@ export function crearSolicitud(
       email: data.email,
       circunscripcion: data.circunscripcion,
     },
-    token,
   });
 }
 
@@ -138,7 +129,7 @@ export function consultarSolicitud(
 ): Promise<ConsultaResponse> {
   return request({
     schema: ConsultaResponseSchema,
-    path: "/solicitudes/consulta",
+    path: "/api/solicitudes/consulta",
     query: {
       codigo: params.codigo,
       dni: params.dni,
@@ -147,38 +138,17 @@ export function consultarSolicitud(
   });
 }
 
-export function historialSolicitudes(
-  token: string,
-): Promise<HistorialResponse> {
+export function historialSolicitudes(): Promise<HistorialResponse> {
   return request({
     schema: HistorialResponseSchema,
-    path: "/solicitudes/historial",
-    token,
+    path: "/api/solicitudes/historial",
   });
 }
 
-export async function descargarSolicitud(
-  token: string,
-  codigo: string,
-): Promise<string> {
-  const base = new URL(API_BASE_URL);
-  const finalUrl = new URL(`/solicitudes/${codigo}/download`, base.toString());
-
-  const response = await fetch(finalUrl.toString(), {
+export async function descargarSolicitud(codigo: string): Promise<string> {
+  const response = await fetch(`/api/solicitudes/${codigo}/download`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    redirect: "manual",
   });
-
-  if (response.status >= 300 && response.status < 400) {
-    const location = response.headers.get("Location") || response.headers.get("location");
-    if (!location) {
-      throw new ApiError(500, "Respuesta sin URL de descarga");
-    }
-    return location;
-  }
 
   if (!response.ok) {
     const text = await response.text();
@@ -191,4 +161,12 @@ export async function descargarSolicitud(
   }
 
   throw new ApiError(500, "Respuesta invalida");
+}
+
+export async function checkOtpSession(): Promise<{ authenticated: boolean }> {
+  const response = await fetch("/api/session", { method: "GET" });
+  if (!response.ok) {
+    return { authenticated: false };
+  }
+  return (await response.json()) as { authenticated: boolean };
 }
