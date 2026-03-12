@@ -4,19 +4,13 @@ export type { Action } from "@/types";
 export const PERMISSIONS: Record<Role, Action[]> = {
   OPERARIO: [
     "upload:pdf",
-    "emit:certificado",
-    "reject:solicitud",
   ],
   SUPERVISOR: [
     "view:dashboard",
     "view:equipo",
     "view:all_solicitudes",
-    "assign:solicitud",
-    "force:estado",
     "manage:operarios",
     "upload:pdf",
-    "emit:certificado",
-    "reject:solicitud",
   ],
 };
 

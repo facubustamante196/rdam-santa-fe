@@ -2,57 +2,92 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchSolicitudes } from "@/lib/api";
+import { fetchSolicitudes, getOperarios } from "@/lib/api";
 import { SolicitudFilters } from "@/components/solicitudes/SolicitudFilters";
+import { SolicitudFiltersSupervisor } from "@/components/solicitudes/SolicitudFiltersSupervisor";
 import { SolicitudesTable } from "@/components/solicitudes/SolicitudesTable";
-import { AsignarOperarioModal } from "@/components/solicitudes/AsignarOperarioModal";
-import { CambiarEstadoModal } from "@/components/solicitudes/CambiarEstadoModal";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSession } from "next-auth/react";
 import type { EstadoSolicitud } from "@/types";
-import type { SolicitudListItem } from "@/lib/schemas";
+import type { Circunscripcion } from "@/types";
 
 type FiltersState = {
   estado: EstadoSolicitud | "";
-  circunscripcion: string;
+  q: string;
+};
+
+type FiltersSupervisorState = {
+  circunscripcion: Circunscripcion | "";
+  operarioId: string;
+  estado: EstadoSolicitud | "";
   fechaDesde: string;
   fechaHasta: string;
-  dni: string;
+  q: string;
 };
 
 const EMPTY_FILTERS: FiltersState = {
   estado: "",
+  q: "",
+};
+
+const EMPTY_FILTERS_SUPERVISOR: FiltersSupervisorState = {
   circunscripcion: "",
+  operarioId: "",
+  estado: "",
   fechaDesde: "",
   fechaHasta: "",
-  dni: "",
+  q: "",
 };
 
 export default function Page() {
-  const { can, canAsignarOperario, canCambiarEstado } = usePermissions();
+  const { can, role } = usePermissions();
   const { data: session } = useSession();
   const token = session?.accessToken;
   const userCircunscripcion = session?.user?.circunscripcion ?? "";
   const [filters, setFilters] = useState<FiltersState>(EMPTY_FILTERS);
   const [appliedFilters, setAppliedFilters] =
     useState<FiltersState>(EMPTY_FILTERS);
-  const [selectedSolicitud, setSelectedSolicitud] =
-    useState<SolicitudListItem | null>(null);
-  const [assignOpen, setAssignOpen] = useState(false);
-  const [stateOpen, setStateOpen] = useState(false);
+  const [filtersSupervisor, setFiltersSupervisor] = useState<FiltersSupervisorState>(
+    EMPTY_FILTERS_SUPERVISOR,
+  );
+  const [appliedFiltersSupervisor, setAppliedFiltersSupervisor] =
+    useState<FiltersSupervisorState>(EMPTY_FILTERS_SUPERVISOR);
   const queryClient = useQueryClient();
 
   const canFilterCircunscripcion = can("view:all_solicitudes");
 
+  const {
+    data: operariosData,
+    isLoading: isLoadingOperarios,
+  } = useQuery({
+    queryKey: ["operarios"],
+    queryFn: () => getOperarios(token ?? ""),
+    enabled: !!token && canFilterCircunscripcion,
+  });
+
   const queryFilters = {
-    estado: appliedFilters.estado || undefined,
-    fechaDesde: appliedFilters.fechaDesde || undefined,
-    fechaHasta: appliedFilters.fechaHasta || undefined,
-    dni: appliedFilters.dni || undefined,
+    estado: canFilterCircunscripcion
+      ? appliedFiltersSupervisor.estado || undefined
+      : appliedFilters.estado || undefined,
     circunscripcion:
-      canFilterCircunscripcion && appliedFilters.circunscripcion
-        ? appliedFilters.circunscripcion
+      canFilterCircunscripcion && appliedFiltersSupervisor.circunscripcion
+        ? appliedFiltersSupervisor.circunscripcion
         : undefined,
+    operarioId:
+      canFilterCircunscripcion && appliedFiltersSupervisor.operarioId
+        ? appliedFiltersSupervisor.operarioId
+        : undefined,
+    fechaDesde:
+      canFilterCircunscripcion && appliedFiltersSupervisor.fechaDesde
+        ? appliedFiltersSupervisor.fechaDesde
+        : undefined,
+    fechaHasta:
+      canFilterCircunscripcion && appliedFiltersSupervisor.fechaHasta
+        ? appliedFiltersSupervisor.fechaHasta
+        : undefined,
+    q: canFilterCircunscripcion
+      ? appliedFiltersSupervisor.q || undefined
+      : appliedFilters.q || undefined,
   };
 
   const {
@@ -79,48 +114,40 @@ export default function Page() {
 
   return (
     <div className="space-y-6">
-      <SolicitudFilters
-        filters={filters}
-        onChange={setFilters}
-        onApply={() => setAppliedFilters(filters)}
-        fixedCircunscripcion={canFilterCircunscripcion ? "" : userCircunscripcion}
-      />
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-slate-900">
+          {role === "OPERARIO"
+            ? `Solicitudes — ${userCircunscripcion}`
+            : "Solicitudes"}
+        </h1>
+      </div>
+      {canFilterCircunscripcion ? (
+        <SolicitudFiltersSupervisor
+          filters={filtersSupervisor}
+          operarios={(operariosData?.operarios ?? []).filter(
+            (operario) => operario.activo,
+          )}
+          isLoadingOperarios={isLoadingOperarios}
+          onChange={setFiltersSupervisor}
+          onApply={() => setAppliedFiltersSupervisor(filtersSupervisor)}
+          onClear={() => {
+            setFiltersSupervisor(EMPTY_FILTERS_SUPERVISOR);
+            setAppliedFiltersSupervisor(EMPTY_FILTERS_SUPERVISOR);
+          }}
+        />
+      ) : (
+        <SolicitudFilters
+          filters={filters}
+          onChange={setFilters}
+          onApply={() => setAppliedFilters(filters)}
+        />
+      )}
       <SolicitudesTable
         solicitudes={solicitudes.data}
-        onAssign={
-          canAsignarOperario
-            ? (item) => {
-                setSelectedSolicitud(item);
-                setAssignOpen(true);
-              }
-            : undefined
-        }
-        onChangeState={
-          canCambiarEstado
-            ? (item) => {
-                setSelectedSolicitud(item);
-                setStateOpen(true);
-              }
-            : undefined
+        onUploadSuccess={() =>
+          queryClient.invalidateQueries({ queryKey: ["solicitudes"] })
         }
       />
-      {selectedSolicitud ? (
-        <>
-          <AsignarOperarioModal
-            isOpen={assignOpen}
-            onClose={() => setAssignOpen(false)}
-            solicitudId={selectedSolicitud.id}
-            onSuccess={() => queryClient.invalidateQueries({ queryKey: ["solicitudes"] })}
-          />
-          <CambiarEstadoModal
-            isOpen={stateOpen}
-            onClose={() => setStateOpen(false)}
-            solicitudId={selectedSolicitud.id}
-            estadoActual={selectedSolicitud.estado}
-            onSuccess={() => queryClient.invalidateQueries({ queryKey: ["solicitudes"] })}
-          />
-        </>
-      ) : null}
     </div>
   );
 }

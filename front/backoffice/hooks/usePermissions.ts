@@ -6,14 +6,14 @@ import { Action, Role } from "@/types";
 
 export function usePermissions() {
   const { data } = useSession();
-  const role = (data?.user?.role ?? "OPERARIO") as Role;
+  const role = ((data?.user as { rol?: Role; role?: Role } | undefined)?.rol ??
+    data?.user?.role ??
+    "OPERARIO") as Role;
 
   const can = (action: Action) => canDo(role, action);
 
   return {
     role,
     can,
-    canAsignarOperario: can("assign:solicitud"),
-    canCambiarEstado: can("force:estado"),
   };
 }

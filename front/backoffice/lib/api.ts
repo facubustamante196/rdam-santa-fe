@@ -12,7 +12,7 @@ import type {
   Solicitud,
   SolicitudListResponse,
 } from "@/lib/schemas";
-import type { EstadoSolicitud } from "@/types";
+import type { AdminUsuariosResponse, EstadoSolicitud } from "@/types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -82,9 +82,10 @@ export async function fetchSolicitudes(params: {
   token: string;
   estado?: EstadoSolicitud;
   circunscripcion?: string;
+  operarioId?: string;
   fechaDesde?: string;
   fechaHasta?: string;
-  dni?: string;
+  q?: string;
   page?: number;
   limit?: number;
 }): Promise<SolicitudListResponse> {
@@ -95,9 +96,10 @@ export async function fetchSolicitudes(params: {
     query: {
       estado: params.estado,
       circunscripcion: params.circunscripcion,
+      operario_id: params.operarioId,
       fecha_desde: params.fechaDesde,
       fecha_hasta: params.fechaHasta,
-      dni: params.dni,
+      q: params.q,
       page: params.page,
       limit: params.limit,
     },
@@ -123,7 +125,9 @@ export async function fetchDashboard(
     token,
     schema: DashboardSchema,
     path: "/admin/dashboard",
-    query: { circunscripcion },
+    query: {
+      circunscripcion,
+    },
   });
 }
 
@@ -165,6 +169,11 @@ export async function fetchOperarios(token: string): Promise<OperariosResponse> 
   } catch (error) {
     throw new ApiError(500, "Respuesta invalida", error);
   }
+}
+
+export async function getOperarios(token: string): Promise<AdminUsuariosResponse> {
+  const response = await fetchOperarios(token);
+  return response as AdminUsuariosResponse;
 }
 
 export async function asignarOperario(params: {

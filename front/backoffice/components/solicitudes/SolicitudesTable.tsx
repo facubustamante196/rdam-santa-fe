@@ -1,12 +1,13 @@
+"use client";
+
 import type { SolicitudListItem } from "@/lib/schemas";
-import { Button } from "@/components/ui/button";
+import { UploadPdfButton } from "@/components/solicitudes/UploadPdfButton";
 import Link from "next/link";
 
 type SolicitudesTableProps = {
   solicitudes: SolicitudListItem[];
   selectable?: boolean;
-  onAssign?: (item: SolicitudListItem) => void;
-  onChangeState?: (item: SolicitudListItem) => void;
+  onUploadSuccess?: () => void;
 };
 
 const statusLabel: Record<SolicitudListItem["estado"], string> = {
@@ -27,10 +28,9 @@ const formatDate = (value: string) => {
 export function SolicitudesTable({
   solicitudes,
   selectable = true,
-  onAssign,
-  onChangeState,
+  onUploadSuccess,
 }: SolicitudesTableProps) {
-  const showActions = Boolean(onAssign || onChangeState);
+  const showActions = true;
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -80,26 +80,11 @@ export function SolicitudesTable({
               </td>
               {showActions ? (
                 <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-2">
-                    {onAssign ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => onAssign(item)}
-                      >
-                        Asignar
-                      </Button>
-                    ) : null}
-                    {onChangeState ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => onChangeState(item)}
-                      >
-                        Cambiar estado
-                      </Button>
-                    ) : null}
-                  </div>
+                  <UploadPdfButton
+                    solicitudId={item.id}
+                    estadoSolicitud={item.estado}
+                    onSuccess={() => onUploadSuccess?.()}
+                  />
                 </td>
               ) : null}
             </tr>

@@ -1,40 +1,39 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { fetchOperarios } from "@/lib/api";
-import {
-  NuevoOperarioSchema,
-  NuevoOperarioValues,
-} from "@/lib/schemas";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getOperarios } from "@/lib/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSession } from "next-auth/react";
+import type { Circunscripcion } from "@/types";
 
 export default function Page() {
-  const { can } = usePermissions();
-  const { data: session } = useSession();
+  const { role } = usePermissions();
+  const { data: session, status } = useSession();
   const token = session?.accessToken;
-  const { data: operarios } = useQuery({
+  const router = useRouter();
+  const { data: operarios, isLoading } = useQuery({
     queryKey: ["operarios"],
-    queryFn: () => fetchOperarios(token ?? ""),
-    enabled: !!token,
+    queryFn: () => getOperarios(token ?? ""),
+    enabled: status === "authenticated" && role === "SUPERVISOR" && !!token,
   });
 
-  const form = useForm<NuevoOperarioValues>({
-    resolver: zodResolver(NuevoOperarioSchema),
-    defaultValues: {
-      nombre: "",
-      usuario: "",
-      rol: "OPERARIO",
-      circunscripcion: "SANTA_FE",
-    },
-  });
+  useEffect(() => {
+    if (status === "authenticated" && role === "OPERARIO") {
+      router.replace("/solicitudes");
+    }
+  }, [role, router, status]);
 
-  if (!operarios) {
+  const circColors: Record<Circunscripcion, string> = {
+    SANTA_FE: "bg-blue-100 text-blue-800",
+    ROSARIO: "bg-amber-100 text-amber-800",
+    VENADO_TUERTO: "bg-emerald-100 text-emerald-800",
+    RAFAELA: "bg-purple-100 text-purple-800",
+    RECONQUISTA: "bg-rose-100 text-rose-800",
+  };
+
+  if (isLoading || !operarios) {
     return <div className="text-sm text-slate-500">Cargando operarios...</div>;
   }
 
@@ -44,8 +43,8 @@ export default function Page() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
-              <th className="px-4 py-3">Operario</th>
-              <th className="px-4 py-3">Rol</th>
+              <th className="px-4 py-3">Nombre completo</th>
+              <th className="px-4 py-3">Username</th>
               <th className="px-4 py-3">Circunscripcion</th>
               <th className="px-4 py-3">Estado</th>
             </tr>
@@ -59,75 +58,31 @@ export default function Page() {
                 <td className="px-4 py-3 font-medium text-slate-800">
                   {operario.nombreCompleto}
                 </td>
-                <td className="px-4 py-3">{operario.rol}</td>
-                <td className="px-4 py-3">{operario.circunscripcion}</td>
+                <td className="px-4 py-3">{operario.username}</td>
                 <td className="px-4 py-3">
-                  {operario.activo ? "Activo" : "Inactivo"}
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
+                      circColors[operario.circunscripcion]
+                    }`}
+                  >
+                    {operario.circunscripcion}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
+                      operario.activo
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {operario.activo ? "Activo" : "Inactivo"}
+                  </span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-900">
-          Nuevo operario
-        </h3>
-        <form
-          className="mt-4 grid gap-3 md:grid-cols-4"
-          onSubmit={form.handleSubmit(() => {})}
-        >
-          <div className="md:col-span-2">
-            <label className="text-xs font-medium text-slate-500">
-              Nombre completo
-            </label>
-            <Input {...form.register("nombre")} />
-            {form.formState.errors.nombre ? (
-              <p className="text-xs text-red-600">
-                {form.formState.errors.nombre.message}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label className="text-xs font-medium text-slate-500">Usuario</label>
-            <Input {...form.register("usuario")} />
-            {form.formState.errors.usuario ? (
-              <p className="text-xs text-red-600">
-                {form.formState.errors.usuario.message}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label className="text-xs font-medium text-slate-500">Rol</label>
-            <Select {...form.register("rol")}>
-              <option value="OPERARIO">Operario</option>
-              <option value="SUPERVISOR">Supervisor</option>
-            </Select>
-          </div>
-          <div className="md:col-span-2">
-            <label className="text-xs font-medium text-slate-500">
-              Circunscripcion
-            </label>
-            <Select {...form.register("circunscripcion")}>
-              <option value="SANTA_FE">SANTA_FE</option>
-              <option value="ROSARIO">ROSARIO</option>
-              <option value="VENADO_TUERTO">VENADO_TUERTO</option>
-              <option value="RAFAELA">RAFAELA</option>
-              <option value="RECONQUISTA">RECONQUISTA</option>
-            </Select>
-            {form.formState.errors.circunscripcion ? (
-              <p className="text-xs text-red-600">
-                {form.formState.errors.circunscripcion.message}
-              </p>
-            ) : null}
-          </div>
-          <div className="flex items-end">
-            <Button type="submit" disabled={!can("manage:operarios")}>
-              Crear operario
-            </Button>
-          </div>
-        </form>
       </div>
     </div>
   );

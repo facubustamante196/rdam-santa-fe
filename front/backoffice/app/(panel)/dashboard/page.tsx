@@ -1,22 +1,50 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { fetchAlertasSla, fetchDashboard } from "@/lib/api";
+import { useEffect, useMemo, useState } from "react";
+import { fetchAlertasSla, fetchDashboard, getOperarios } from "@/lib/api";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { WorkloadTable } from "@/components/dashboard/WorkloadTable";
 import { useSession } from "next-auth/react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Select } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Page() {
   const { can } = usePermissions();
   const { data: session } = useSession();
   const token = session?.accessToken;
   const [circunscripcion, setCircunscripcion] = useState("");
+  const [operarioId, setOperarioId] = useState("");
+
+  const {
+    data: operariosData,
+    isLoading: isLoadingOperarios,
+  } = useQuery({
+    queryKey: ["operarios"],
+    queryFn: () => getOperarios(token ?? ""),
+    enabled: !!token && can("view:dashboard"),
+  });
+
+  const operarios = useMemo(
+    () => (operariosData?.operarios ?? []).filter((operario) => operario.activo),
+    [operariosData],
+  );
+
+  const selectedOperario = operarios.find((operario) => operario.id === operarioId);
+  const effectiveCircunscripcion =
+    selectedOperario?.circunscripcion ?? circunscripcion;
+
+  useEffect(() => {
+    if (selectedOperario) {
+      setCircunscripcion(selectedOperario.circunscripcion);
+    }
+  }, [selectedOperario]);
+
   const { data } = useQuery({
-    queryKey: ["dashboard", circunscripcion],
-    queryFn: () => fetchDashboard(token ?? "", circunscripcion || undefined),
+    queryKey: ["dashboard", effectiveCircunscripcion],
+    queryFn: () =>
+      fetchDashboard(token ?? "", effectiveCircunscripcion || undefined),
     enabled: !!token,
   });
 
@@ -45,17 +73,17 @@ export default function Page() {
   return (
     <div className="space-y-6">
       {can("view:dashboard") ? (
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-3">
           <div>
             <p className="text-xs font-medium text-slate-500">
               Circunscripcion
             </p>
             <p className="text-sm text-slate-600">
-              {circunscripcion || "Todas"}
+              {effectiveCircunscripcion || "Todas"}
             </p>
           </div>
           <Select
-            className="w-full max-w-[220px]"
+            className="w-full"
             value={circunscripcion}
             onChange={(event) => setCircunscripcion(event.target.value)}
           >
@@ -66,6 +94,27 @@ export default function Page() {
             <option value="RAFAELA">RAFAELA</option>
             <option value="RECONQUISTA">RECONQUISTA</option>
           </Select>
+          <div className="flex items-center gap-2">
+            <Select
+              className="w-full"
+              value={operarioId}
+              onChange={(event) => setOperarioId(event.target.value)}
+              disabled={isLoadingOperarios}
+            >
+              <option value="">Operario</option>
+              {isLoadingOperarios ? (
+                <option value="" disabled>
+                  Cargando...
+                </option>
+              ) : null}
+              {operarios.map((operario) => (
+                <option key={operario.id} value={operario.id}>
+                  {operario.nombreCompleto} - {operario.circunscripcion}
+                </option>
+              ))}
+            </Select>
+            {isLoadingOperarios ? <Spinner size="sm" /> : null}
+          </div>
         </div>
       ) : null}
 

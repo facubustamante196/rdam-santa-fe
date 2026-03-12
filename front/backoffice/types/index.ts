@@ -4,12 +4,9 @@ export type Action =
   | "view:dashboard"
   | "view:equipo"
   | "view:all_solicitudes"
-  | "assign:solicitud"
-  | "force:estado"
   | "manage:operarios"
   | "upload:pdf"
-  | "emit:certificado"
-  | "reject:solicitud";
+  | "emit:certificado";
 
 export type EstadoSolicitud =
   | "PENDIENTE_PAGO"
@@ -18,3 +15,23 @@ export type EstadoSolicitud =
   | "EMITIDA"
   | "VENCIDO"
   | "PUBLICADO_VENCIDO";
+
+export type Circunscripcion =
+  | "SANTA_FE"
+  | "ROSARIO"
+  | "VENADO_TUERTO"
+  | "RAFAELA"
+  | "RECONQUISTA";
+
+export interface Operario {
+  id: string;
+  username: string;
+  nombreCompleto: string;
+  rol: "OPERARIO";
+  circunscripcion: Circunscripcion;
+  activo: boolean;
+}
+
+export interface AdminUsuariosResponse {
+  operarios: Operario[];
+}
