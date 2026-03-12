@@ -17,6 +17,7 @@ import {
 } from '../database/entities';
 import {
     ActorTipo,
+    Circunscripcion,
     EstadoSolicitud,
     RolUsuario,
 } from '../database/enums';
@@ -54,7 +55,8 @@ export class AdminService {
         if (query.estado) where.estado = query.estado;
         const circunscripcion =
             user.rol === RolUsuario.OPERARIO ? user.circunscripcion : query.circunscripcion;
-        if (circunscripcion) where.circunscripcion = circunscripcion;
+        if (circunscripcion)
+            where.circunscripcion = circunscripcion as Circunscripcion;
         if (query.dni) where.dniHash = this.encryptionService.blindIndex(query.dni);
 
         if (query.fecha_desde && query.fecha_hasta) {
