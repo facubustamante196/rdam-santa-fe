@@ -27,6 +27,7 @@ export const OtpValidarFormSchema = z.object({
   dni: z.string().regex(/^\d{7,8}$/, "DNI invalido"),
   email: z.string().email("Email invalido"),
   codigo: z.string().regex(/^\d{6}$/, "Codigo invalido"),
+  captchaToken: z.string().min(1, "Captcha requerido"),
 });
 
 export const SolicitudFormSchema = z.object({
@@ -59,6 +60,7 @@ export const OtpSolicitarResponseSchema = z.object({
 });
 
 export const OtpValidarResponseSchema = z.object({
+  access_token: z.string(),
   message: z.string(),
   expires_in: z.string(),
 });

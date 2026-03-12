@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { OtpRequestForm } from "@/components/forms/OtpRequestForm";
-import { OtpValidateForm } from "@/components/forms/OtpValidateForm";
+import { OtpVerifyForm } from "@/components/forms/OtpVerifyForm";
 import { HistorialList } from "@/components/forms/HistorialList";
 import { useOtpSession } from "@/store/useOtpSession";
-import type { OtpSolicitarFormValues } from "@/lib/schemas";
 import { checkOtpSession } from "@/lib/api";
 
 export default function Page() {
   const validated = useOtpSession((state) => state.validated);
   const setValidated = useOtpSession((state) => state.setValidated);
-  const [otpData, setOtpData] = useState<OtpSolicitarFormValues | null>(null);
+  const setOtpData = useOtpSession((state) => state.setOtpData);
 
   useEffect(() => {
     checkOtpSession()
@@ -33,13 +32,12 @@ export default function Page() {
           Solicita y valida tu OTP para ver el historial.
         </p>
         <div className="mt-4 space-y-6">
-          <OtpRequestForm onSuccess={setOtpData} />
-          <OtpValidateForm
-            defaultValues={{
-              dni: otpData?.dni,
-              email: otpData?.email,
-            }}
+          <OtpRequestForm
+            onSuccess={(values) =>
+              setOtpData({ dni: values.dni, email: values.email })
+            }
           />
+          <OtpVerifyForm />
         </div>
       </section>
 

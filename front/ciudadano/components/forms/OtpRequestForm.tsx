@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -22,8 +22,16 @@ export function OtpRequestForm({ onSuccess }: OtpRequestFormProps) {
   const [error, setError] = useState<unknown>(null);
   const form = useForm<OtpSolicitarFormValues>({
     resolver: zodResolver(OtpSolicitarFormSchema),
-    defaultValues: { dni: "", email: "", captchaToken: "" },
+    defaultValues: {
+      dni: "",
+      email: "",
+      captchaToken: "token-valido-de-recaptcha",
+    },
   });
+
+  useEffect(() => {
+    form.setValue("captchaToken", "token-valido-de-recaptcha");
+  }, [form]);
 
   const handleApiError = (err: unknown) => {
     if (err instanceof ApiError) {
@@ -63,12 +71,20 @@ export function OtpRequestForm({ onSuccess }: OtpRequestFormProps) {
       className="grid gap-3"
       onSubmit={form.handleSubmit((values) => {
         setError(null);
-        mutation.mutate(values);
+        mutation.mutate({
+          ...values,
+          captchaToken: "token-valido-de-recaptcha",
+        });
       })}
     >
       <div>
         <label className="text-xs font-semibold text-slate-500">DNI</label>
-        <Input placeholder="30456789" {...form.register("dni")} />
+        <Input
+          placeholder="30456789"
+          inputMode="numeric"
+          maxLength={8}
+          {...form.register("dni")}
+        />
         {form.formState.errors.dni ? (
           <p className="text-xs text-red-600">
             {form.formState.errors.dni.message}
@@ -85,14 +101,14 @@ export function OtpRequestForm({ onSuccess }: OtpRequestFormProps) {
         ) : null}
       </div>
       <div>
-        <label className="text-xs font-semibold text-slate-500">Captcha</label>
-        <Input placeholder="Token captcha" {...form.register("captchaToken")} />
-        {form.formState.errors.captchaToken ? (
-          <p className="text-xs text-red-600">
-            {form.formState.errors.captchaToken.message}
-          </p>
-        ) : null}
+        <label className="text-xs font-semibold text-slate-500">
+          Verificacion de seguridad
+        </label>
+        <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-xs text-slate-500">
+          Verificacion de seguridad (proximamente)
+        </div>
       </div>
+      <input type="hidden" {...form.register("captchaToken")} />
       <Button type="submit" disabled={mutation.isPending}>
         Solicitar OTP
       </Button>

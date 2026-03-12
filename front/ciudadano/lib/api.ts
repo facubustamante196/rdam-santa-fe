@@ -67,12 +67,6 @@ async function request<T>({
       .catch(() => null)) as { message?: string } | null;
     throw new ApiError(response.status, data?.message ?? "Error inesperado");
   }
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
 
   const json = (await response.json()) as unknown;
   try {
