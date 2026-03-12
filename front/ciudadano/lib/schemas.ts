@@ -73,6 +73,15 @@ export const SolicitudCrearResponseSchema = z.object({
   mensaje: z.string(),
 });
 
+export const PagoIniciarResponseSchema = z.object({
+  transaccion_id: z.string(),
+  url_pago: z.string().url(),
+  monto: z.number(),
+  expira_en: z.number(),
+  metodo: z.string(),
+  checkout_fields: z.record(z.string(), z.string()),
+});
+
 export const ConsultaTimelineSchema = z.object({
   estado: EstadoSolicitudSchema,
   fecha: z.string(),
@@ -111,5 +120,6 @@ export type ConsultaFormValues = z.infer<typeof ConsultaFormSchema>;
 export type OtpSolicitarResponse = z.infer<typeof OtpSolicitarResponseSchema>;
 export type OtpValidarResponse = z.infer<typeof OtpValidarResponseSchema>;
 export type SolicitudCrearResponse = z.infer<typeof SolicitudCrearResponseSchema>;
+export type PagoIniciarResponse = z.infer<typeof PagoIniciarResponseSchema>;
 export type ConsultaResponse = z.infer<typeof ConsultaResponseSchema>;
 export type HistorialResponse = z.infer<typeof HistorialResponseSchema>;

@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { solicitarOtp } from "@/lib/api";
+import { solicitarOtp, ApiError } from "@/lib/api";
 import {
   OtpSolicitarFormSchema,
   type OtpSolicitarFormValues,
 } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 type OtpRequestFormProps = {
   onSuccess: (payload: OtpSolicitarFormValues) => void;
@@ -18,10 +19,35 @@ type OtpRequestFormProps = {
 
 export function OtpRequestForm({ onSuccess }: OtpRequestFormProps) {
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const form = useForm<OtpSolicitarFormValues>({
     resolver: zodResolver(OtpSolicitarFormSchema),
     defaultValues: { dni: "", email: "", captchaToken: "" },
   });
+
+  const handleApiError = (err: unknown) => {
+    if (err instanceof ApiError) {
+      if (err.status === 401) {
+        void fetch("/api/session", { method: "DELETE" }).finally(() => {
+          window.location.href = "/solicitar";
+        });
+        return;
+      }
+      if (err.status === 404) {
+        setError(new Error("No encontrado"));
+        return;
+      }
+      if (err.status === 429) {
+        setError(new Error("Demasiados intentos, espera unos minutos"));
+        return;
+      }
+      if (err.status === 500) {
+        setError(new Error("Error del servidor, intente mas tarde"));
+        return;
+      }
+    }
+    setError(err);
+  };
 
   const mutation = useMutation({
     mutationFn: solicitarOtp,
@@ -29,12 +55,16 @@ export function OtpRequestForm({ onSuccess }: OtpRequestFormProps) {
       setMessage("OTP enviado. Revisa tu email.");
       onSuccess(values);
     },
+    onError: handleApiError,
   });
 
   return (
     <form
       className="grid gap-3"
-      onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+      onSubmit={form.handleSubmit((values) => {
+        setError(null);
+        mutation.mutate(values);
+      })}
     >
       <div>
         <label className="text-xs font-semibold text-slate-500">DNI</label>
@@ -69,9 +99,7 @@ export function OtpRequestForm({ onSuccess }: OtpRequestFormProps) {
       {message ? (
         <p className="text-xs text-emerald-700">{message}</p>
       ) : null}
-      {mutation.error ? (
-        <p className="text-xs text-red-600">No se pudo enviar OTP.</p>
-      ) : null}
+      <ErrorMessage error={error} />
     </form>
   );
 }

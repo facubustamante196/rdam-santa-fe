@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { crearSolicitud } from "@/lib/api";
+import { crearSolicitud, ApiError } from "@/lib/api";
 import {
   SolicitudFormSchema,
   type SolicitudFormValues,
@@ -12,9 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export function SolicitudForm() {
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const form = useForm<SolicitudFormValues>({
     resolver: zodResolver(SolicitudFormSchema),
     defaultValues: {
@@ -26,20 +28,50 @@ export function SolicitudForm() {
     },
   });
 
+  const handleApiError = (err: unknown) => {
+    if (err instanceof ApiError) {
+      if (err.status === 401) {
+        void fetch("/api/session", { method: "DELETE" }).finally(() => {
+          window.location.href = "/solicitar";
+        });
+        return;
+      }
+      if (err.status === 404) {
+        setError(new Error("No encontrado"));
+        return;
+      }
+      if (err.status === 429) {
+        setError(new Error("Demasiados intentos, espera unos minutos"));
+        return;
+      }
+      if (err.status === 500) {
+        setError(new Error("Error del servidor, intente mas tarde"));
+        return;
+      }
+    }
+    setError(err);
+  };
+
   const mutation = useMutation({
     mutationFn: (values: SolicitudFormValues) => crearSolicitud(values),
     onSuccess: (data) => {
       setMessage(data.mensaje);
       if (typeof window !== "undefined") {
-        window.location.href = data.url_pago;
+        window.location.href = `/pagar?codigo=${encodeURIComponent(
+          data.codigo,
+        )}`;
       }
     },
+    onError: handleApiError,
   });
 
   return (
     <form
       className="grid gap-3"
-      onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+      onSubmit={form.handleSubmit((values) => {
+        setError(null);
+        mutation.mutate(values);
+      })}
     >
       <div>
         <label className="text-xs font-semibold text-slate-500">CUIL</label>
@@ -93,9 +125,7 @@ export function SolicitudForm() {
       {message ? (
         <p className="text-xs text-emerald-700">{message}</p>
       ) : null}
-      {mutation.error ? (
-        <p className="text-xs text-red-600">No se pudo crear la solicitud.</p>
-      ) : null}
+      <ErrorMessage error={error} />
     </form>
   );
 }

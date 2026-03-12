@@ -7,3 +7,17 @@ export async function GET() {
   const token = cookies().get(COOKIE_NAME)?.value;
   return NextResponse.json({ authenticated: Boolean(token) });
 }
+
+export async function DELETE() {
+  cookies().set({
+    name: COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+
+  return NextResponse.json({ ok: true });
+}

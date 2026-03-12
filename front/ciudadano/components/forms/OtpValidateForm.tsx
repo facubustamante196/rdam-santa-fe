@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { validarOtp } from "@/lib/api";
+import { validarOtp, ApiError } from "@/lib/api";
 import {
   OtpValidarFormSchema,
   type OtpValidarFormValues,
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useOtpSession } from "@/store/useOtpSession";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 type OtpValidateFormProps = {
   defaultValues?: Partial<OtpValidarFormValues>;
@@ -23,6 +24,7 @@ export function OtpValidateForm({
   onSuccess,
 }: OtpValidateFormProps) {
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const setValidated = useOtpSession((state) => state.setValidated);
   const form = useForm<OtpValidarFormValues>({
     resolver: zodResolver(OtpValidarFormSchema),
@@ -33,6 +35,30 @@ export function OtpValidateForm({
     },
   });
 
+  const handleApiError = (err: unknown) => {
+    if (err instanceof ApiError) {
+      if (err.status === 401) {
+        void fetch("/api/session", { method: "DELETE" }).finally(() => {
+          window.location.href = "/solicitar";
+        });
+        return;
+      }
+      if (err.status === 404) {
+        setError(new Error("No encontrado"));
+        return;
+      }
+      if (err.status === 429) {
+        setError(new Error("Demasiados intentos, espera unos minutos"));
+        return;
+      }
+      if (err.status === 500) {
+        setError(new Error("Error del servidor, intente mas tarde"));
+        return;
+      }
+    }
+    setError(err);
+  };
+
   const mutation = useMutation({
     mutationFn: validarOtp,
     onSuccess: () => {
@@ -40,12 +66,16 @@ export function OtpValidateForm({
       setMessage("OTP validado. Ya podes continuar.");
       onSuccess?.();
     },
+    onError: handleApiError,
   });
 
   return (
     <form
       className="grid gap-3"
-      onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+      onSubmit={form.handleSubmit((values) => {
+        setError(null);
+        mutation.mutate(values);
+      })}
     >
       <div>
         <label className="text-xs font-semibold text-slate-500">DNI</label>
@@ -80,9 +110,7 @@ export function OtpValidateForm({
       {message ? (
         <p className="text-xs text-emerald-700">{message}</p>
       ) : null}
-      {mutation.error ? (
-        <p className="text-xs text-red-600">No se pudo validar OTP.</p>
-      ) : null}
+      <ErrorMessage error={error} />
     </form>
   );
 }

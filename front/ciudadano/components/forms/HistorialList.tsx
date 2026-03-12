@@ -1,11 +1,12 @@
 "use client";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { descargarSolicitud, historialSolicitudes } from "@/lib/api";
+import { descargarSolicitud, historialSolicitudes, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { ErrorMessage } from "@/components/ui/error-message";
 
 export function HistorialList() {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["historial"],
     queryFn: () => historialSolicitudes(),
   });
@@ -23,7 +24,31 @@ export function HistorialList() {
     return <p className="text-sm text-slate-500">Cargando historial...</p>;
   }
 
-  if (error || !data) {
+  if (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      void fetch("/api/session", { method: "DELETE" }).finally(() => {
+        window.location.href = "/solicitar";
+      });
+      return null;
+    }
+    if (error instanceof ApiError && error.status === 404) {
+      return (
+        <p className="text-sm text-slate-500">
+          No encontrado
+        </p>
+      );
+    }
+    return (
+      <div className="space-y-2">
+        <ErrorMessage error={error} />
+        <Button variant="outline" onClick={() => refetch()}>
+          Reintentar
+        </Button>
+      </div>
+    );
+  }
+
+  if (!data) {
     return (
       <p className="text-sm text-slate-500">
         No se pudo cargar el historial.

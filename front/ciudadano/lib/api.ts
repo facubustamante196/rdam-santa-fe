@@ -3,6 +3,7 @@ import {
   HistorialResponseSchema,
   OtpSolicitarResponseSchema,
   OtpValidarResponseSchema,
+  PagoIniciarResponseSchema,
   SolicitudCrearResponseSchema,
 } from "@/lib/schemas";
 import type {
@@ -13,6 +14,7 @@ import type {
   OtpSolicitarResponse,
   OtpValidarFormValues,
   OtpValidarResponse,
+  PagoIniciarResponse,
   SolicitudCrearResponse,
   SolicitudFormValues,
 } from "@/lib/schemas";
@@ -26,13 +28,8 @@ type RequestOptions<T> = {
 };
 
 export class ApiError extends Error {
-  status: number;
-  details?: unknown;
-
-  constructor(status: number, message: string, details?: unknown) {
+  constructor(public status: number, message: string) {
     super(message);
-    this.status = status;
-    this.details = details;
   }
 }
 
@@ -53,7 +50,23 @@ async function request<T>({
     }
   }
 
-  const response = await fetch(finalUrl.toString().replace("http://localhost", ""), {
+  const response = await fetch(
+    finalUrl.toString().replace("http://localhost", ""),
+    {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    },
+  );
+
+  if (!response.ok) {
+    const data = (await response
+      .json()
+      .catch(() => null)) as { message?: string } | null;
+    throw new ApiError(response.status, data?.message ?? "Error inesperado");
+  }
     method,
     headers: {
       "Content-Type": "application/json",
@@ -61,16 +74,11 @@ async function request<T>({
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new ApiError(response.status, text || "API error");
-  }
-
   const json = (await response.json()) as unknown;
   try {
     return schema.parse(json);
   } catch (error) {
-    throw new ApiError(500, "Respuesta invalida", error);
+    throw new ApiError(500, "Respuesta invalida");
   }
 }
 
@@ -151,8 +159,10 @@ export async function descargarSolicitud(codigo: string): Promise<string> {
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new ApiError(response.status, text || "API error");
+    const data = (await response
+      .json()
+      .catch(() => null)) as { message?: string } | null;
+    throw new ApiError(response.status, data?.message ?? "Error inesperado");
   }
 
   const json = (await response.json()) as { url?: string };
@@ -161,6 +171,17 @@ export async function descargarSolicitud(codigo: string): Promise<string> {
   }
 
   throw new ApiError(500, "Respuesta invalida");
+}
+
+export function iniciarPago(
+  codigoSolicitud: string,
+): Promise<PagoIniciarResponse> {
+  return request({
+    schema: PagoIniciarResponseSchema,
+    path: "/api/pagos/iniciar",
+    method: "POST",
+    body: { codigo_solicitud: codigoSolicitud },
+  });
 }
 
 export async function checkOtpSession(): Promise<{ authenticated: boolean }> {
