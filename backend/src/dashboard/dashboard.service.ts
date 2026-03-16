@@ -3,11 +3,18 @@ import { DataSource, Repository } from 'typeorm';
 import { SolicitudEntity } from '../database/entities';
 import { Circunscripcion, EstadoSolicitud } from '../database/enums';
 
-export interface DashboardStats {
-    solicitudes_por_estado: Record<string, number>;
-    total_solicitudes: number;
+export interface DashboardMetrics {
+    total: number;
+    pendientes: number;
+    emitidas: number;
+    rechazadas: number;
+    vencidas: number;
+    tiempo_promedio_hs: number;
+    por_circunscripcion: { circunscripcion: string; total: number }[];
+}
+
+export interface DashboardStats extends DashboardMetrics {
     solicitudes_hoy: number;
-    solicitudes_por_circunscripcion: Record<string, number>;
     tiempos_promedio: {
         pago_dias: number | null;
         emision_dias: number | null;
@@ -98,10 +105,16 @@ export class DashboardService {
         const totalSla = dentro_plazo + fuera_plazo;
 
         return {
-            solicitudes_por_estado,
-            total_solicitudes: total,
+            total: total,
+            pendientes: solicitudes_por_estado[EstadoSolicitud.PENDIENTE_PAGO] || 0,
+            emitidas: solicitudes_por_estado[EstadoSolicitud.EMITIDA] || 0,
+            rechazadas: solicitudes_por_estado[EstadoSolicitud.RECHAZADA] || 0,
+            vencidas: (solicitudes_por_estado[EstadoSolicitud.VENCIDO] || 0) + (solicitudes_por_estado[EstadoSolicitud.PUBLICADO_VENCIDO] || 0),
+            tiempo_promedio_hs: 0,
+            por_circunscripcion: Object.entries(solicitudes_por_circunscripcion).map(
+                ([circunscripcion, total]) => ({ circunscripcion, total }),
+            ),
             solicitudes_hoy,
-            solicitudes_por_circunscripcion,
             tiempos_promedio: {
                 pago_dias: null,
                 emision_dias: null,

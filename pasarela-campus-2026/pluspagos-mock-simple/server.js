@@ -9,7 +9,7 @@ const express = require('express');
 const { decryptString, generatePlatformId } = require('./crypto');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 
 // ============================================
 // CONFIGURACIÓN - Los alumnos pueden modificar esto
@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 const CONFIG = {
   MERCHANT_GUID: 'test-merchant-001',
   SECRET_KEY: 'clave-secreta-campus-2026',
-  WEBHOOK_URL: null  // Se configura desde el dashboard
+  WEBHOOK_URL: 'http://127.0.0.1:3002/webhooks/pago'
 };
 
 // Almacén en memoria de transacciones
@@ -208,9 +208,13 @@ async function sendWebhook(txn) {
       body: JSON.stringify(payload)
     });
     
-    console.log('Webhook response:', response.status);
+    console.log('Webhook response status:', response.status);
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error del backend al recibir webhook:', errorText);
+    }
   } catch (error) {
-    console.error('Error enviando webhook:', error.message);
+    console.error('❌ Error de red enviando webhook a ' + CONFIG.WEBHOOK_URL + ':', error.message);
   }
 }
 

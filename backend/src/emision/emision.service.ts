@@ -12,6 +12,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { DataSource, Repository } from 'typeorm';
 import { StateTransitionService } from '../common/services/state-transition.service';
+import { EmailService } from '../email/email.service';
 import { SolicitudEntity } from '../database/entities';
 import { ActorTipo, EstadoSolicitud } from '../database/enums';
 
@@ -26,6 +27,7 @@ export class EmisionService {
         dataSource: DataSource,
         private readonly configService: ConfigService,
         private readonly stateTransition: StateTransitionService,
+        private readonly emailService: EmailService,
     ) {
         this.solicitudesRepository = dataSource.getRepository(SolicitudEntity);
         this.bucket = this.configService.get<string>('S3_BUCKET', 'rdam-documents');
@@ -56,6 +58,10 @@ export class EmisionService {
 
         if (!solicitud) {
             throw new UnprocessableEntityException('Solicitud no encontrada');
+        }
+
+        if (!file) {
+            throw new UnprocessableEntityException('No se ha recibido ningún archivo');
         }
 
         if (solicitud.estado !== EstadoSolicitud.PAGADA) {
@@ -99,6 +105,13 @@ export class EmisionService {
 
         this.logger.log(
             `Certificado emitido para solicitud ${solicitud.codigo}: ${storageKey}`,
+        );
+
+        // Enviar email al ciudadano con el PDF adjunto
+        await this.emailService.enviarCertificadoConAdjunto(
+            solicitud.email,
+            solicitud.codigo,
+            file.buffer,
         );
 
         return {

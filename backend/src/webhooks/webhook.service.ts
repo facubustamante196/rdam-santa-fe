@@ -76,13 +76,16 @@ export class WebhookService {
     }
 
     async procesarWebhook(payload: IncomingWebhookPagoPayload, ipOrigen?: string) {
+        this.logger.log(`Recibiendo webhook de IP ${ipOrigen}: ${JSON.stringify(payload)}`);
         const normalized = this.normalizePayload(payload);
+        this.logger.log(`Payload normalizado: ${JSON.stringify(normalized)}`);
 
         const solicitud = await this.solicitudesRepository.findOne({
             where: { codigo: normalized.referenciaInterna },
         });
 
         if (!solicitud) {
+            this.logger.error(`Solicitud no encontrada para codigo: ${normalized.referenciaInterna}`);
             throw new BadRequestException(
                 `Solicitud no encontrada: ${normalized.referenciaInterna}`,
             );

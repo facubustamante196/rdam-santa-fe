@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import {
     Between,
     DataSource,
@@ -6,6 +7,7 @@ import {
     LessThanOrEqual,
     MoreThanOrEqual,
     Repository,
+    ILike,
 } from 'typeorm';
 import { EncryptionService } from '../encryption/encryption.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
@@ -21,7 +23,10 @@ import {
     EstadoSolicitud,
     RolUsuario,
 } from '../database/enums';
+import { EmisionService } from '../emision/emision.service';
 import { ListarSolicitudesQueryDto } from './dto/listar-solicitudes.query.dto';
+import { ActualizarUsuarioDto } from './dto/actualizar-usuario.dto';
+import { CrearUsuarioDto } from './dto/crear-usuario.dto';
 
 export type ListarSolicitudesQuery = ListarSolicitudesQueryDto;
 
@@ -36,6 +41,7 @@ export class AdminService {
         dataSource: DataSource,
         private readonly encryptionService: EncryptionService,
         private readonly auditoriaService: AuditoriaService,
+        private readonly emisionService: EmisionService,
     ) {
         this.solicitudesRepository = dataSource.getRepository(SolicitudEntity);
         this.usuariosRepository = dataSource.getRepository(UsuarioEntity);
@@ -59,6 +65,28 @@ export class AdminService {
             where.circunscripcion = circunscripcion as Circunscripcion;
         if (query.dni) where.dniHash = this.encryptionService.blindIndex(query.dni);
 
+        if (query.search) {
+            const search = query.search.trim();
+            // Si es puramente numérico y tiene longitud de DNI o CUIL, buscamos por hash
+            if (/^\d+$/.test(search) && (search.length === 7 || search.length === 8 || search.length === 11)) {
+                const hash = this.encryptionService.blindIndex(search);
+                // Usamos un array de condiciones para simular OR
+                const multiWhere = [
+                    { ...where, dniHash: hash },
+                    { ...where, cuilHash: hash }
+                ];
+                // En TypeORM, si pasamos un array a 'where', es un OR entre los elementos
+                return this.listarConCondicionesMultiple(multiWhere, query, page, limit, skip);
+            } else {
+                // Si no, buscamos por nombre o código (parcial)
+                const multiWhere = [
+                    { ...where, nombreCompleto: ILike(`%${search}%`) },
+                    { ...where, codigo: ILike(`%${search}%`) }
+                ];
+                return this.listarConCondicionesMultiple(multiWhere, query, page, limit, skip);
+            }
+        }
+
         if (query.fecha_desde && query.fecha_hasta) {
             where.createdAt = Between(
                 new Date(query.fecha_desde),
@@ -70,6 +98,16 @@ export class AdminService {
             where.createdAt = LessThanOrEqual(new Date(query.fecha_hasta));
         }
 
+        return this.listarConCondicionesMultiple(where, query, page, limit, skip);
+    }
+
+    private async listarConCondicionesMultiple(
+        where: FindOptionsWhere<SolicitudEntity> | FindOptionsWhere<SolicitudEntity>[],
+        query: ListarSolicitudesQuery,
+        page: number,
+        limit: number,
+        skip: number,
+    ) {
         const [solicitudes, total] = await this.solicitudesRepository.findAndCount({
             where,
             relations: { operarioAsignado: true },
@@ -79,26 +117,67 @@ export class AdminService {
         });
 
         return {
-            data: solicitudes.map((s) => ({
-                id: s.id,
-                codigo: s.codigo,
-                nombreCompleto: s.nombreCompleto,
-                email: s.email,
-                circunscripcion: s.circunscripcion,
-                estado: s.estado,
-                operarioAsignado: s.operarioAsignado
-                    ? { id: s.operarioAsignado.id, nombreCompleto: s.operarioAsignado.nombreCompleto }
-                    : null,
-                issuedAt: s.issuedAt,
-                createdAt: s.createdAt,
-                updatedAt: s.updatedAt,
-            })),
+            data: solicitudes.map((s) => {
+                let cuilEnmascarado = '***';
+                try {
+                    const cuil = this.encryptionService.decrypt(s.cuilEncriptado);
+                    cuilEnmascarado = `${cuil.slice(0, 2)}-${'*'.repeat(6)}-${cuil.slice(-1)}`;
+                } catch { }
+
+                return {
+                    id: s.id,
+                    codigo: s.codigo,
+                    nombre: s.nombreCompleto,
+                    cuil: cuilEnmascarado,
+                    email: s.email,
+                    circunscripcion: s.circunscripcion,
+                    estado: s.estado,
+                    operarioAsignado: s.operarioAsignado
+                        ? { id: s.operarioAsignado.id, nombreCompleto: s.operarioAsignado.nombreCompleto }
+                        : null,
+                    issuedAt: s.issuedAt,
+                    creado_en: s.createdAt,
+                    updatedAt: s.updatedAt,
+                };
+            }),
             meta: {
                 total,
                 page,
                 limit,
                 totalPages: Math.ceil(total / limit),
             },
+        };
+    }
+
+    async crearUsuario(dto: CrearUsuarioDto) {
+        const existente = await this.usuariosRepository.findOne({
+            where: { username: dto.username },
+        });
+        if (existente) {
+            throw new ConflictException('El nombre de usuario ya existe');
+        }
+
+        const passwordHash = await bcrypt.hash(dto.password, 10);
+
+        const usuario = this.usuariosRepository.create({
+            username: dto.username,
+            passwordHash,
+            nombreCompleto: dto.nombreCompleto,
+            rol: RolUsuario.OPERARIO,
+            circunscripcion: dto.circunscripcion,
+            activo: true,
+        });
+
+        const guardado = await this.usuariosRepository.save(usuario);
+
+        return {
+            id: guardado.id,
+            username: guardado.username,
+            nombre: guardado.nombreCompleto,
+            rol: guardado.rol,
+            circunscripcion: guardado.circunscripcion,
+            activo: guardado.activo,
+            creado_en: guardado.fechaCreacion,
         };
     }
 
@@ -112,7 +191,7 @@ export class AdminService {
             operarios: usuarios.map((usuario) => ({
                 id: usuario.id,
                 username: usuario.username,
-                nombreCompleto: usuario.nombreCompleto,
+                nombre: usuario.nombreCompleto, // Mapping to frontend field name 'nombre'
                 rol: usuario.rol,
                 circunscripcion: usuario.circunscripcion,
                 activo: usuario.activo,
@@ -140,25 +219,40 @@ export class AdminService {
             }),
         ]);
 
+        let dni = '***';
+        let cuil = '***';
         let dniEnmascarado = '***';
         let cuilEnmascarado = '***';
 
         try {
-            const dni = this.encryptionService.decrypt(solicitud.dniEncriptado);
+            dni = this.encryptionService.decrypt(solicitud.dniEncriptado);
             dniEnmascarado = `${dni.slice(0, 2)}${'*'.repeat(Math.max(0, dni.length - 3))}${dni.slice(-1)}`;
         } catch { }
 
         try {
-            const cuil = this.encryptionService.decrypt(solicitud.cuilEncriptado);
+            cuil = this.encryptionService.decrypt(solicitud.cuilEncriptado);
             cuilEnmascarado = `${cuil.slice(0, 2)}-${'*'.repeat(6)}-${cuil.slice(-1)}`;
         } catch { }
 
+        let pdfUrl = solicitud.pdfUrl;
+        if (solicitud.pdfStorageKey) {
+            try {
+                const res = await this.emisionService.generarUrlDescarga(solicitud.id);
+                pdfUrl = res.url;
+            } catch {
+                // Silently fail if file is missing in S3
+            }
+        }
+
         return {
             ...solicitud,
+            pdfUrl,
             registrosAuditoria: auditoria,
             transaccionesPago: transacciones,
             dniEncriptado: undefined,
             cuilEncriptado: undefined,
+            dni,             // Full DNI
+            cuil,            // Full CUIL
             dniEnmascarado,
             cuilEnmascarado,
             puede_cargar_pdf: solicitud.estado === EstadoSolicitud.PAGADA,
@@ -203,6 +297,31 @@ export class AdminService {
                 id: operario.id,
                 nombre: operario.nombreCompleto,
             },
+        };
+    }
+
+    async actualizarUsuario(id: string, dto: ActualizarUsuarioDto) {
+        const usuario = await this.usuariosRepository.findOne({ where: { id } });
+        if (!usuario) {
+            throw new NotFoundException('Usuario no encontrado');
+        }
+
+        if (dto.nombreCompleto !== undefined) usuario.nombreCompleto = dto.nombreCompleto;
+        else if ((dto as any).nombre !== undefined) usuario.nombreCompleto = (dto as any).nombre;
+        if (dto.username !== undefined) usuario.username = dto.username;
+        if (dto.rol !== undefined) usuario.rol = dto.rol;
+        if (dto.circunscripcion !== undefined) usuario.circunscripcion = dto.circunscripcion;
+        if (dto.activo !== undefined) usuario.activo = dto.activo;
+
+        await this.usuariosRepository.save(usuario);
+
+        return {
+            id: usuario.id,
+            username: usuario.username,
+            nombre: usuario.nombreCompleto,
+            rol: usuario.rol,
+            circunscripcion: usuario.circunscripcion,
+            activo: usuario.activo,
         };
     }
 }

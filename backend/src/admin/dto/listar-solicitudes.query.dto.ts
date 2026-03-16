@@ -17,6 +17,10 @@ export class ListarSolicitudesQueryDto {
     estado?: EstadoSolicitud;
 
     @IsOptional()
+    @IsString()
+    search?: string;
+
+    @IsOptional()
     @IsEnum(Circunscripcion)
     circunscripcion?: Circunscripcion;
 

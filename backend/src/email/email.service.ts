@@ -6,6 +6,11 @@ export interface EmailOptions {
     to: string;
     subject: string;
     html: string;
+    attachments?: Array<{
+        filename: string;
+        content: Buffer | string;
+        contentType?: string;
+    }>;
 }
 
 @Injectable()
@@ -92,7 +97,7 @@ export class EmailService {
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
         <h2 style="color: #2b6cb0;">📄 Certificado Disponible</h2>
         <p>Su certificado para la solicitud <strong>${codigo}</strong> ya está disponible.</p>
-        <p>Ingrese al portal con su DNI y código OTP para descargar el PDF.</p>
+        <p>Ingrese al portal con su DNI y código OTP para consultar y descargar el PDF oficial en cualquier momento.</p>
         <div style="background: #ebf8ff; padding: 16px; border-radius: 8px; margin: 16px 0;">
           <strong>Código de solicitud:</strong> ${codigo}<br>
           <strong>Vigencia:</strong> 90 días desde la emisión
@@ -108,6 +113,40 @@ export class EmailService {
             to: email,
             subject: `RDAM — Certificado Disponible (${codigo})`,
             html,
+        });
+    }
+
+    /**
+     * Envía notificacion de certificado EMITIDO adjuntando el PDF.
+     */
+    async enviarCertificadoConAdjunto(
+        email: string,
+        codigo: string,
+        pdfBuffer: Buffer,
+    ) {
+        const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
+        <h2 style="color: #1a365d;">📄 Certificado RDAM Emitido</h2>
+        <p>Adjunto a este correo encontrará el certificado correspondiente a su solicitud <strong>${codigo}</strong>.</p>
+        <p>También puede descargarlo en cualquier momento desde el portal oficial de consulta.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0;">
+        <p style="color: #a0aec0; font-size: 12px;">
+          Poder Judicial de la Provincia de Santa Fe — RDAM
+        </p>
+      </div>
+    `;
+
+        return this.enviar({
+            to: email,
+            subject: `RDAM — Certificado Solicitud ${codigo}`,
+            html,
+            attachments: [
+                {
+                    filename: `Certificado-RDAM-${codigo}.pdf`,
+                    content: pdfBuffer,
+                    contentType: 'application/pdf',
+                },
+            ],
         });
     }
 
@@ -153,6 +192,7 @@ export class EmailService {
                 to: options.to,
                 subject: options.subject,
                 html: options.html,
+                attachments: options.attachments,
             });
 
             this.logger.log(`📧 Email enviado a ${options.to}: ${result.messageId}`);

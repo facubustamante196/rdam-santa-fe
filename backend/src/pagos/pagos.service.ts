@@ -37,7 +37,7 @@ export class PagosService {
         this.secretKey = this.requireConfig('PASARELA_SECRET_KEY');
         this.frontendBaseUrl = this.configService.get<string>(
             'FRONTEND_URL',
-            'http://localhost:3002',
+            'http://localhost:3000',
         );
         this.backendBaseUrl = this.configService.get<string>(
             'BACKEND_PUBLIC_URL',

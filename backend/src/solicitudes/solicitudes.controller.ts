@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Req, UseGuards, Query, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SolicitudesService } from './solicitudes.service';
 import { CrearSolicitudDto } from './dto/crear-solicitud.dto';
+import { ConsultaStatusDto } from './dto/consulta-status.dto';
 import { OtpAuthGuard } from '../auth/guards/otp-auth.guard';
 
 @ApiTags('Solicitudes')
@@ -27,6 +28,23 @@ export class SolicitudesController {
             ciudadano.email,
             ip,
         );
+    }
+
+    /**
+     * GET /solicitudes/consulta — Consultar estado (público).
+     */
+    @Get('consulta')
+    async consultar(@Query() query: ConsultaStatusDto) {
+        if (!query.codigo && (!query.dni || !query.email)) {
+            throw new BadRequestException('Debe proporcionar el código o el DNI y Email');
+        }
+
+        const resultado = await this.solicitudesService.consultar(query);
+        if (!resultado) {
+            throw new NotFoundException('No se encontró la solicitud');
+        }
+
+        return resultado;
     }
 
     /**

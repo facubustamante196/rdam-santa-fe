@@ -38,6 +38,10 @@ export class SolicitudEntity {
     @Column({ name: 'dni_hash', type: 'varchar', length: 64 })
     dniHash!: string;
 
+    @Column({ name: 'cuil_hash', type: 'varchar', length: 64, nullable: true })
+    @Index('idx_solicitudes_cuil_hash')
+    cuilHash?: string | null;
+
     @Column({ name: 'nombre_completo', type: 'varchar', length: 120 })
     nombreCompleto!: string;
 
