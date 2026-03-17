@@ -127,6 +127,8 @@ export class SolicitudesService {
         }
 
         return {
+            id: solicitud.id,
+            codigo: solicitud.codigo,
             estado: solicitud.estado,
             downloadUrl,
             timeline: solicitud.registrosAuditoria.map((reg) => ({

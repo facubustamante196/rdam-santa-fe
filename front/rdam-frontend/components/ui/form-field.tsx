@@ -6,7 +6,7 @@ import { Label } from "./label";
 
 interface FormFieldProps {
   label: string;
-  error?: string;
+  error?: any;
   hint?: string;
   required?: boolean;
   children: React.ReactNode;
@@ -23,20 +23,22 @@ export function FormField({
   className,
   htmlFor,
 }: FormFieldProps) {
+  const errorMessage = typeof error === "string" ? error : error?.message;
+
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <Label htmlFor={htmlFor} className={cn(error && "text-destructive")}>
+      <Label htmlFor={htmlFor} className={cn(errorMessage && "text-destructive")}>
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
       {children}
-      {error && (
+      {errorMessage && (
         <p className="text-xs text-destructive flex items-center gap-1 animate-fade-in">
           <span className="inline-block w-1 h-1 rounded-full bg-destructive" />
-          {error}
+          {errorMessage}
         </p>
       )}
-      {hint && !error && (
+      {hint && !errorMessage && (
         <p className="text-xs text-muted-foreground">{hint}</p>
       )}
     </div>

@@ -21,6 +21,7 @@ export class EmisionService {
     private readonly logger = new Logger(EmisionService.name);
     private readonly solicitudesRepository: Repository<SolicitudEntity>;
     private readonly s3Client: S3Client;
+    private readonly s3PublicClient: S3Client;
     private readonly bucket: string;
 
     constructor(
@@ -34,14 +35,25 @@ export class EmisionService {
         const accessKeyId = this.requireConfig('S3_ACCESS_KEY');
         const secretAccessKey = this.requireConfig('S3_SECRET_KEY');
 
-        this.s3Client = new S3Client({
-            endpoint: this.configService.get<string>('S3_ENDPOINT', 'http://localhost:9000'),
+        const s3Config = {
             region: this.configService.get<string>('S3_REGION', 'us-east-1'),
             credentials: {
                 accessKeyId,
                 secretAccessKey,
             },
             forcePathStyle: true,
+        };
+
+        this.s3Client = new S3Client({
+            ...s3Config,
+            endpoint: this.configService.get<string>('S3_ENDPOINT', 'http://localhost:9000'),
+        });
+
+        // Cliente para URLs públicas (accesibles desde afuera de Docker)
+        this.s3PublicClient = new S3Client({
+            ...s3Config,
+            endpoint: this.configService.get<string>('S3_PUBLIC_ENDPOINT') || 
+                      this.configService.get<string>('S3_ENDPOINT', 'http://localhost:9000'),
         });
     }
 
@@ -153,7 +165,7 @@ export class EmisionService {
             Key: solicitud.pdfStorageKey,
         });
 
-        const url = await getSignedUrl(this.s3Client, command, {
+        const url = await getSignedUrl(this.s3PublicClient, command, {
             expiresIn: 900,
         });
 

@@ -56,6 +56,8 @@ export interface SolicitudResponse {
 }
 
 export interface ConsultaResponse {
+  id: string;
+  codigo: string;
   estado: EstadoSolicitud;
   downloadUrl?: string;
   timeline: TimelineEvent[];
@@ -69,11 +71,13 @@ export interface TimelineEvent {
 
 export type EstadoSolicitud =
   | "PENDIENTE_PAGO"
+  | "PAGADA"
   | "PENDIENTE"
   | "EN_PROCESO"
   | "EMITIDA"
   | "RECHAZADA"
-  | "VENCIDA";
+  | "VENCIDO"
+  | "PUBLICADO_VENCIDO";
 
 export interface AdminSolicitud {
   id: string;
@@ -181,7 +185,7 @@ export const api = {
   },
 
   pagos: {
-    iniciar: (codigo_solicitud: string, token: string) =>
+    iniciar: (codigo_solicitud: string) =>
       request<{
         transaccion_id: string;
         url_pago: string;
@@ -189,7 +193,6 @@ export const api = {
       }>("/pagos/iniciar", {
         method: "POST",
         body: JSON.stringify({ codigo_solicitud }),
-        token,
       }),
   },
 

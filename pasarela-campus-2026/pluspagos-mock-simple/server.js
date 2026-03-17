@@ -15,9 +15,9 @@ const PORT = process.env.PORT || 3005;
 // CONFIGURACIÓN - Los alumnos pueden modificar esto
 // ============================================
 const CONFIG = {
-  MERCHANT_GUID: 'test-merchant-001',
-  SECRET_KEY: 'clave-secreta-campus-2026',
-  WEBHOOK_URL: 'http://127.0.0.1:3002/webhooks/pago'
+  MERCHANT_GUID: process.env.MERCHANT_GUID || 'test-merchant-001',
+  SECRET_KEY: process.env.SECRET_KEY || 'clave-secreta-campus-2026',
+  WEBHOOK_URL: process.env.WEBHOOK_URL || 'http://127.0.0.1:3002/webhooks/pago'
 };
 
 // Almacén en memoria de transacciones

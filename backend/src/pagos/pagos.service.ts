@@ -17,6 +17,7 @@ export class PagosService {
     private readonly solicitudesRepository: Repository<SolicitudEntity>;
     private readonly transaccionesRepository: Repository<TransaccionPagoEntity>;
     private readonly pasarelaUrl: string;
+    private readonly pasarelaPublicUrl: string;
     private readonly merchantGuid: string;
     private readonly secretKey: string;
     private readonly frontendBaseUrl: string;
@@ -33,6 +34,10 @@ export class PagosService {
             'PASARELA_API_URL',
             'http://localhost:3000',
         );
+        this.pasarelaPublicUrl = this.configService.get<string>(
+            'PASARELA_PUBLIC_URL',
+            this.pasarelaUrl,
+        );
         this.merchantGuid = this.requireConfig('PASARELA_MERCHANT_GUID');
         this.secretKey = this.requireConfig('PASARELA_SECRET_KEY');
         this.frontendBaseUrl = this.configService.get<string>(
@@ -48,7 +53,7 @@ export class PagosService {
         );
     }
 
-    async iniciarPagoCiudadano(codigoSolicitud: string, dniHash: string) {
+    async iniciarPagoCiudadano(codigoSolicitud: string) {
         const solicitud = await this.solicitudesRepository.findOne({
             where: { codigo: codigoSolicitud },
             select: {
@@ -64,11 +69,6 @@ export class PagosService {
             throw new NotFoundException('Solicitud no encontrada');
         }
 
-        if (solicitud.dniHash !== dniHash) {
-            throw new ForbiddenException(
-                'La solicitud no corresponde a la identidad autenticada',
-            );
-        }
 
         if (solicitud.estado !== EstadoSolicitud.PENDIENTE_PAGO) {
             throw new ConflictException(
@@ -118,7 +118,7 @@ export class PagosService {
 
         return {
             transaccion_id: saved.id,
-            url_pago: this.pasarelaUrl,
+            url_pago: this.pasarelaPublicUrl,
             monto,
             expira_en: 3600,
             metodo: 'POST',

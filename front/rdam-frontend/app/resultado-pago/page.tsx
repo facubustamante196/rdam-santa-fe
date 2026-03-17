@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, ArrowRight, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function ResultadoPagoPage() {
+function ResultadoPagoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const codigo = searchParams.get("codigo");
@@ -79,5 +79,13 @@ export default function ResultadoPagoPage() {
         Si tuviste algún problema técnico, por favor contactanos a soporte@rdam.justiciasantafe.gov.ar
       </p>
     </div>
+  );
+}
+
+export default function ResultadoPagoPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center">Cargando...</div>}>
+      <ResultadoPagoContent />
+    </Suspense>
   );
 }

@@ -16,19 +16,32 @@ import { Badge } from "@/components/ui/badge";
 import { EstadoBadge } from "@/components/shared/estado-badge";
 import { Card } from "@/components/ui/card";
 
-const ESTADOS = ["", "PENDIENTE_PAGO", "PENDIENTE", "EN_PROCESO", "EMITIDA", "RECHAZADA", "VENCIDA"];
+const ESTADOS = [
+  { value: "", label: "Todos los estados" },
+  { value: "PENDIENTE_PAGO", label: "Pendiente de pago" },
+  { value: "PAGADA", label: "Pagada" },
+  { value: "EMITIDA", label: "Emitida" },
+  { value: "PUBLICADO_VENCIDO", label: "Vencida (90 días)" },
+];
 
 const MOCK_SOLICITUDES: AdminSolicitud[] = [];
 
 export default function SolicitudesAdminPage() {
   const router = useRouter();
-  const { adminToken, adminRole } = useAuthStore();
+  const { adminToken, adminRole, adminUser } = useAuthStore();
   const [solicitudes, setSolicitudes] = useState<AdminSolicitud[]>(MOCK_SOLICITUDES);
   const [total, setTotal] = useState(MOCK_SOLICITUDES.length);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [estado, setEstado] = useState("");
-  const [circ, setCirc] = useState("");
+  
+  // Set initial circumscription based on user role and assigned city
+  const [circ, setCirc] = useState(() => {
+    if (adminRole === "OPERARIO" && adminUser?.circunscripcion) {
+      return CIRC_ENUM_TO_ID[adminUser.circunscripcion] || "";
+    }
+    return "";
+  });
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -95,22 +108,23 @@ export default function SolicitudesAdminPage() {
           className="rounded-md border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         >
           {ESTADOS.map((e) => (
-            <option key={e} value={e}>{e || "Todos los estados"}</option>
+            <option key={e.value} value={e.value}>{e.label}</option>
           ))}
         </select>
 
-        {adminRole === "SUPERVISOR" && (
-          <select
-            value={circ}
-            onChange={(e) => { setCirc(e.target.value); setPage(1); }}
-            className="rounded-md border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
+        <select
+          value={circ}
+          onChange={(e) => { setCirc(e.target.value); setPage(1); }}
+          disabled={adminRole === "OPERARIO"}
+          className="rounded-md border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-75 disabled:cursor-not-allowed"
+        >
+          {adminRole === "SUPERVISOR" && (
             <option value="">Todas las ciudades</option>
-            {CIRCUNSCRIPCIONES.map((c) => (
-              <option key={c.id} value={c.id}>{c.ciudad.toUpperCase()}</option>
-            ))}
-          </select>
-        )}
+          )}
+          {CIRCUNSCRIPCIONES.map((c) => (
+            <option key={c.id} value={c.id}>{c.ciudad.toUpperCase()}</option>
+          ))}
+        </select>
       </div>
 
       {/* Table */}

@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Search, Clock, FileText } from "lucide-react";
+import { Search, Clock, FileText, CreditCard } from "lucide-react";
 
 import { consultaSchema, type ConsultaInput } from "@/lib/schemas";
 import { api, type ConsultaResponse } from "@/lib/api";
 import { formatDateTime } from "@/lib/utils";
+import { useSolicitudStore } from "@/lib/stores/solicitud.store";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +23,8 @@ export default function ConsultaPage() {
   const [mode, setMode] = useState<SearchMode>("codigo");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ConsultaResponse | null>(null);
+  const [payLoading, setPayLoading] = useState(false);
+  const router = useRouter();
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<any>({
     mode: "onChange",
@@ -39,6 +43,39 @@ export default function ConsultaPage() {
       toast.error("No se encontró ninguna solicitud con esos datos.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePagar = async () => {
+    if (!result || !result.codigo) return;
+    
+    setPayLoading(true);
+    try {
+      const res = await api.pagos.iniciar(result.codigo);
+      
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = res.url_pago;
+      form.target = "_blank";
+
+      Object.entries(res.checkout_fields).forEach(([name, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+      
+      toast.success("Redirigiendo a la pasarela de pagos...");
+    } catch (error: any) {
+      const msg = error.body?.message || "No se pudo iniciar el pago. Intentá nuevamente.";
+      toast.error(msg);
+    } finally {
+      setPayLoading(false);
     }
   };
 
@@ -148,6 +185,23 @@ export default function ConsultaPage() {
               </div>
             ))}
           </div>
+
+          {result.estado === "PENDIENTE_PAGO" && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <Button 
+                variant="gold" 
+                className="w-full"
+                loading={payLoading}
+                onClick={handlePagar}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Ir a pagar arancel
+              </Button>
+              <p className="text-[10px] text-center text-muted-foreground mt-3">
+                No necesitás identificarte nuevamente para pagar.
+              </p>
+            </div>
+          )}
 
           {result.downloadUrl && (
             <div className="mt-6 pt-6 border-t border-border">

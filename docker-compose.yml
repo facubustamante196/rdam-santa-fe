@@ -1,0 +1,115 @@
+name: rdam
+version: '3.8'
+
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: rdam_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rdam_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: rdam_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  minio:
+    image: minio/minio
+    container_name: rdam_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  minio-create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/rdam-documents;
+      /usr/bin/mc anonymous set none myminio/rdam-documents;
+      exit 0;
+      "
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rdam_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rdam_db?schema=public
+      - REDIS_URL=redis://redis:6379
+      - S3_ENDPOINT=http://minio:9000
+      - S3_PUBLIC_ENDPOINT=http://localhost:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - OTP_JWT_SECRET=cambiar-otp-secret-min-32-caracteres
+      - S3_BUCKET=rdam-documents
+      - JWT_SECRET=supersecret-dev-key-12345
+      - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - DNI_HASH_SALT=dev-salt
+      - PASARELA_API_URL=http://mock-pagos:3000
+      - PASARELA_MERCHANT_GUID=test-merchant-001
+      - PASARELA_SECRET_KEY=clave-secreta-campus-2026
+      - PASARELA_WEBHOOK_SECRET=whsec_xxx
+      - FRONTEND_URL=http://localhost:3001
+      - BACKEND_PUBLIC_URL=http://backend:3000
+      - PASARELA_PUBLIC_URL=http://localhost:3002
+      - PORT=3000
+      - DB_SYNCHRONIZE=true
+    depends_on:
+      - postgres
+      - redis
+      - minio
+
+  frontend:
+    build:
+      context: ./front/rdam-frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3000
+    container_name: rdam_frontend
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+
+  mock-pagos:
+    build:
+      context: ./pasarela-campus-2026/pluspagos-mock-simple
+      dockerfile: Dockerfile
+    container_name: rdam_mock_pagos
+    environment:
+      - PORT=3000
+      - WEBHOOK_URL=http://backend:3000/webhooks/pago
+    ports:
+      - "3002:3000"
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

@@ -7,20 +7,18 @@ import { toast } from "sonner";
 
 import { api } from "@/lib/api";
 import { useSolicitudStore } from "@/lib/stores/solicitud.store";
-import { useAuthStore } from "@/lib/stores/auth.store";
 import { Button } from "@/components/ui/button";
 import { SolicitudProgress } from "@/components/citizen/solicitud-progress";
 
 export default function PagoPage() {
-  const { solicitudCodigo, solicitudId, urlPago, goToStep } = useSolicitudStore();
-  const { citizenToken } = useAuthStore();
+  const { solicitudCodigo, solicitudId, urlPago, goToStep, step } = useSolicitudStore();
   const [loading, setLoading] = useState(false);
 
   const handlePagar = async () => {
-    if (!solicitudCodigo || !citizenToken) return;
+    if (!solicitudCodigo) return;
     setLoading(true);
     try {
-      const res = await api.pagos.iniciar(solicitudCodigo, citizenToken);
+      const res = await api.pagos.iniciar(solicitudCodigo);
       
       // Redirect to payment gateway via POST
       const form = document.createElement("form");
@@ -55,6 +53,10 @@ export default function PagoPage() {
       toast.success("Código copiado.");
     }
   };
+
+  if (step === "done") {
+    return <DonePageContent />;
+  }
 
   return (
     <div className="animate-fade-in">
@@ -112,7 +114,7 @@ export default function PagoPage() {
   );
 }
 
-export function DonePage() {
+function DonePageContent() {
   const { solicitudCodigo, reset } = useSolicitudStore();
 
   return (
