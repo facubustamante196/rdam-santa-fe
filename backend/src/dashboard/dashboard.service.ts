@@ -34,10 +34,27 @@ export class DashboardService {
         this.solicitudesRepository = dataSource.getRepository(SolicitudEntity);
     }
 
-    async obtenerStats(circunscripcion?: Circunscripcion): Promise<DashboardStats> {
+    async obtenerStats(circunscripcion?: Circunscripcion, periodo?: string): Promise<DashboardStats> {
+        let fechaInicio: Date | null = null;
+        if (periodo) {
+            fechaInicio = new Date();
+            fechaInicio.setHours(0, 0, 0, 0);
+            if (periodo === 'semana') {
+                fechaInicio.setDate(fechaInicio.getDate() - 7);
+            } else if (periodo === 'mes') {
+                fechaInicio.setMonth(fechaInicio.getMonth() - 1);
+            } else if (periodo === 'año') {
+                fechaInicio.setFullYear(fechaInicio.getFullYear() - 1);
+            }
+            // 'hoy' case is already handled by the default 00:00:00 setting
+        }
+
         const porEstadoQb = this.solicitudesRepository.createQueryBuilder('s');
         if (circunscripcion) {
             porEstadoQb.where('s.circunscripcion = :circunscripcion', { circunscripcion });
+        }
+        if (fechaInicio) {
+            porEstadoQb.andWhere('s.createdAt >= :fechaInicio', { fechaInicio });
         }
         const porEstado = await porEstadoQb
             .select('s.estado', 'estado')
@@ -66,12 +83,21 @@ export class DashboardService {
         if (circunscripcion) {
             hoyQb.andWhere('s.circunscripcion = :circunscripcion', { circunscripcion });
         }
+        if (fechaInicio) {
+            hoyQb.andWhere('s.createdAt >= :fechaInicio', { fechaInicio });
+        }
         const solicitudes_hoy = await hoyQb.getCount();
 
-        const porCircunscripcion = await this.solicitudesRepository
+        const circQb = this.solicitudesRepository
             .createQueryBuilder('s')
             .select('s.circunscripcion', 'circunscripcion')
-            .addSelect('COUNT(s.id)', 'cantidad')
+            .addSelect('COUNT(s.id)', 'cantidad');
+        
+        if (fechaInicio) {
+            circQb.andWhere('s.createdAt >= :fechaInicio', { fechaInicio });
+        }
+        
+        const porCircunscripcion = await circQb
             .groupBy('s.circunscripcion')
             .getRawMany<{ circunscripcion: Circunscripcion; cantidad: string }>();
 

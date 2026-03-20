@@ -35,6 +35,8 @@ export class SolicitudEntity {
     @Column({ name: 'cuil_encriptado', type: 'text' })
     cuilEncriptado!: string;
 
+    // El Blind Index del DNI: Se hashea con SHA-256 + Salt Estático. Es de un solo sentido (no se puede desencriptar). 
+    // Solo sirve para "Comparar Búsquedas" a máxima velocidad gracias al @Index sin revelar la identidad a nivel base de datos.
     @Column({ name: 'dni_hash', type: 'varchar', length: 64 })
     dniHash!: string;
 

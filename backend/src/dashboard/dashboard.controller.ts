@@ -22,6 +22,7 @@ export class DashboardController {
     @Roles(RolUsuario.SUPERVISOR, RolUsuario.OPERARIO)
     async stats(
         @Query('circunscripcion') circunscripcion?: Circunscripcion,
+        @Query('periodo') periodo?: string,
         @Req() req?: any,
     ): Promise<DashboardStats> {
         const user = req?.user;
@@ -30,6 +31,6 @@ export class DashboardController {
                 ? user.circunscripcion
                 : circunscripcion;
 
-        return this.dashboardService.obtenerStats(filtro);
+        return this.dashboardService.obtenerStats(filtro, periodo);
     }
 }

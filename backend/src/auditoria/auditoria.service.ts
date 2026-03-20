@@ -46,4 +46,54 @@ export class AuditoriaService {
             relations: ['usuario'],
         });
     }
+
+    async listar(params: {
+        solicitudId?: string;
+        usuarioId?: string;
+        accion?: string;
+        desde?: string;
+        hasta?: string;
+        limit?: number;
+        offset?: number;
+    }) {
+        const qb = this.auditoriaRepository.createQueryBuilder('a')
+            .leftJoinAndSelect('a.usuario', 'usuario')
+            .orderBy('a.timestamp', 'DESC');
+
+        if (params.solicitudId) {
+            qb.andWhere('a.solicitudId = :solicitudId', { solicitudId: params.solicitudId });
+        }
+        if (params.usuarioId) {
+            qb.andWhere('a.usuarioId = :usuarioId', { usuarioId: params.usuarioId });
+        }
+        if (params.accion) {
+            qb.andWhere('a.accion = :accion', { accion: params.accion });
+        }
+        if (params.desde) {
+            qb.andWhere('a.timestamp >= :desde', { desde: params.desde });
+        }
+        if (params.hasta) {
+            qb.andWhere('a.timestamp <= :hasta', { hasta: params.hasta });
+        }
+
+        const limit = params.limit || 50;
+        const offset = params.offset || 0;
+
+        const [logs, total] = await qb
+            .take(limit)
+            .skip(offset)
+            .getManyAndCount();
+
+        return {
+            logs: logs.map(log => ({
+                id: log.id,
+                usuario: log.usuario?.username || 'sistema',
+                accion: log.accion,
+                solicitud_id: log.solicitudId,
+                detalle: log.observaciones || log.estadoNuevo ? `${log.estadoAnterior || ''} → ${log.estadoNuevo || ''}` : '',
+                fecha: log.timestamp.toISOString(),
+            })),
+            total,
+        };
+    }
 }

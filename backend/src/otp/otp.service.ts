@@ -49,12 +49,15 @@ export class OtpService {
             'OTP_JWT_EXPIRES_IN',
             '30m',
         );
+        // Configuración de Google reCAPTCHA v3
+        // El sistema evalúa al usuario de forma invisible mediante un "score" (puntaje).
         this.captchaEnabled =
             this.configService.get<string>('CAPTCHA_ENABLED', 'false') === 'true';
         this.captchaSecret = this.configService.get<string>(
             'CAPTCHA_SECRET_KEY',
             '',
         );
+        // Puntaje mínimo para pasar la prueba (0.0 es bot seguro, 1.0 es humano seguro)
         this.captchaMinScore = Number(
             this.configService.get<string>('CAPTCHA_MIN_SCORE', '0.5'),
         );
@@ -201,7 +204,11 @@ export class OtpService {
         return this.solicitar(dni, email, captchaToken, remoteIp);
     }
 
+    /**
+     * Valida el token reCAPTCHA v3 enviado por el cliente.
+     */
     private async validarCaptcha(captchaToken?: string, remoteIp?: string) {
+        // 1. Si no está encendido mediante variables de entorno, permite el paso directo
         if (!this.captchaEnabled) {
             return;
         }
@@ -210,6 +217,7 @@ export class OtpService {
             throw new BadRequestException('CAPTCHA no está configurado en el servidor');
         }
 
+        // 2. Si está encendido, el frontend está obligado a enviar el token generado por Google
         if (!captchaToken) {
             throw new BadRequestException('Debe completar el CAPTCHA');
         }
@@ -224,6 +232,7 @@ export class OtpService {
                 body.append('remoteip', remoteIp);
             }
 
+            // 3. El backend hace una petición secreta a los servidores de Google para validar
             const response = await fetch(
                 'https://www.google.com/recaptcha/api/siteverify',
                 {
@@ -240,6 +249,7 @@ export class OtpService {
                 throw new BadRequestException('CAPTCHA inválido');
             }
 
+            // 4. Parsea la respuesta de Google que incluye el éxito booleano y el "score"
             const verification = (await response.json()) as {
                 success?: boolean;
                 score?: number;
@@ -252,6 +262,7 @@ export class OtpService {
                 throw new BadRequestException('CAPTCHA inválido');
             }
 
+            // 5. Verifica que el puntaje sea igual o mayor al mínimo configurado (reCAPTCHA v3)
             if (
                 typeof verification.score === 'number' &&
                 verification.score < this.captchaMinScore
@@ -259,7 +270,7 @@ export class OtpService {
                 this.logger.warn(
                     `CAPTCHA score bajo: ${verification.score} < ${this.captchaMinScore}`,
                 );
-                throw new BadRequestException('CAPTCHA inválido');
+                throw new BadRequestException('CAPTCHA inválido'); // Puntaje insuficiente = posible bot
             }
         } catch (error) {
             if (error instanceof BadRequestException) {
