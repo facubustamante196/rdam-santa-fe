@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { UserPlus, ToggleLeft, ToggleRight, Edit2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { crearOperarioSchema, type CrearOperarioInput } from "@/lib/schemas";
 import { api, type Usuario } from "@/lib/api";
@@ -22,7 +23,8 @@ import { EditarUsuarioModal } from "@/components/admin/editar-usuario-modal";
 const MOCK_USUARIOS: Usuario[] = [];
 
 export default function UsuariosPage() {
-  const { adminToken } = useAuthStore();
+  const router = useRouter();
+  const { adminToken, adminRole } = useAuthStore();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -40,8 +42,17 @@ export default function UsuariosPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [adminToken]);
+    if (adminRole && adminRole !== "SUPERVISOR") {
+      toast.error("Acceso denegado: Se requieren permisos de supervisor.");
+      router.replace("/admin/dashboard");
+    } else {
+      fetchData();
+    }
+  }, [adminToken, adminRole, router]);
+
+  if (adminRole !== "SUPERVISOR") {
+    return null;
+  }
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CrearOperarioInput>({
     resolver: zodResolver(crearOperarioSchema),
@@ -56,11 +67,9 @@ export default function UsuariosPage() {
       reset();
       setShowForm(false);
       toast.success(`Operario ${data.username} creado exitosamente.`);
-    } catch {
-      // No fallback
-      reset();
-      setShowForm(false);
-      toast.success(`Operario ${data.username} creado.`);
+    } catch (error: any) {
+      const msg = error.body?.message || "Error al crear el operario.";
+      toast.error(msg);
     } finally {
       setCreating(false);
     }

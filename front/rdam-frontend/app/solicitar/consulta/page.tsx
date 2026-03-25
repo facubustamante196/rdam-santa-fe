@@ -22,8 +22,8 @@ type SearchMode = "codigo" | "dniemail";
 export default function ConsultaPage() {
   const [mode, setMode] = useState<SearchMode>("codigo");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ConsultaResponse | null>(null);
-  const [payLoading, setPayLoading] = useState(false);
+  const [results, setResults] = useState<ConsultaResponse[] | null>(null);
+  const [payLoading, setPayLoading] = useState<string | null>(null);
   const router = useRouter();
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<any>({
@@ -32,13 +32,13 @@ export default function ConsultaPage() {
 
   const onSubmit = async (data: any) => {
     setLoading(true);
-    setResult(null);
+    setResults(null);
     try {
       const params = mode === "codigo"
         ? { codigo: data.codigo }
         : { dni: data.dni, email: data.email };
       const res = await api.solicitudes.consultar(params);
-      setResult(res);
+      setResults(res);
     } catch {
       toast.error("No se encontró ninguna solicitud con esos datos.");
     } finally {
@@ -46,12 +46,12 @@ export default function ConsultaPage() {
     }
   };
 
-  const handlePagar = async () => {
-    if (!result || !result.codigo) return;
+  const handlePagar = async (codigo: string) => {
+    if (!codigo) return;
     
-    setPayLoading(true);
+    setPayLoading(codigo);
     try {
-      const res = await api.pagos.iniciar(result.codigo);
+      const res = await api.pagos.iniciar(codigo);
       
       const form = document.createElement("form");
       form.method = "POST";
@@ -75,7 +75,7 @@ export default function ConsultaPage() {
       const msg = error.body?.message || "No se pudo iniciar el pago. Intentá nuevamente.";
       toast.error(msg);
     } finally {
-      setPayLoading(false);
+      setPayLoading(null);
     }
   };
 
@@ -96,7 +96,7 @@ export default function ConsultaPage() {
           <button
             key={m}
             type="button"
-            onClick={() => { setMode(m); reset(); setResult(null); }}
+            onClick={() => { setMode(m); reset(); setResults(null); }}
             className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${
               mode === m
                 ? "bg-white shadow-sm text-navy"
@@ -147,79 +147,91 @@ export default function ConsultaPage() {
         </form>
       </div>
 
-      {/* Result */}
-      {result && (
-        <div className="mt-6 rounded-2xl border border-border bg-white shadow-sm p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-display font-semibold text-navy">Estado de tu solicitud</h2>
-            <EstadoBadge estado={result.estado} />
-          </div>
-
-          {/* Timeline */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Historial
-            </h3>
-            {result.timeline.map((event, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="flex flex-col items-center">
-                  <div className={`h-2.5 w-2.5 rounded-full mt-0.5 ${
-                    i === 0 ? "bg-gold" : "bg-border"
-                  }`} />
-                  {i < result.timeline.length - 1 && (
-                    <div className="w-px flex-1 bg-border mt-1 min-h-5" />
-                  )}
-                </div>
-                <div className="pb-4">
-                  <p className="text-sm font-medium text-navy">{event.estado}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                    <Clock className="h-3 w-3" />
-                    {formatDateTime(event.fecha)}
+      {/* Results */}
+      {results && results.length > 0 && (
+        <div className="mt-8 space-y-6">
+          <h2 className="font-display font-semibold text-navy text-xl text-center">
+            {mode === "codigo" ? "Resultado de la solicitud" : "Historial de solicitudes"}
+          </h2>
+          {results.map((result) => (
+            <div key={result.id} className="rounded-2xl border border-border bg-white shadow-sm p-6 animate-fade-in relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-gold" />
+              <div className="flex items-start justify-between mb-5">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
+                    Trámite
                   </p>
-                  {event.observacion && (
-                    <p className="text-xs text-muted-foreground mt-1 italic">
-                      "{event.observacion}"
-                    </p>
-                  )}
+                  <p className="font-mono font-bold text-navy text-lg">
+                    {result.codigo}
+                  </p>
                 </div>
+                <EstadoBadge estado={result.estado} />
               </div>
-            ))}
-          </div>
 
-          {result.estado === "PENDIENTE_PAGO" && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <Button 
-                variant="gold" 
-                className="w-full"
-                loading={payLoading}
-                onClick={handlePagar}
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Ir a pagar arancel
-              </Button>
-              <p className="text-[10px] text-center text-muted-foreground mt-3">
-                No necesitás identificarte nuevamente para pagar.
-              </p>
-            </div>
-          )}
+              {/* Timeline */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Línea de tiempo
+                </h3>
+                {result.timeline.map((event, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className={`h-2.5 w-2.5 rounded-full mt-0.5 ${
+                        i === 0 ? "bg-navy" : "bg-border"
+                      }`} />
+                      {i < result.timeline.length - 1 && (
+                        <div className="w-px flex-1 bg-border mt-1 min-h-5" />
+                      )}
+                    </div>
+                    <div className="pb-4">
+                      <p className="text-sm font-medium text-navy">{event.estado}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Clock className="h-3 w-3" />
+                        {formatDateTime(event.fecha)}
+                      </p>
+                      {event.observacion && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          "{event.observacion}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-          {result.downloadUrl && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <Button 
-                variant="gold" 
-                className="w-full"
-                asChild
-              >
-                <a href={result.downloadUrl} target="_blank" rel="noopener noreferrer">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Descargar Certificado PDF
-                </a>
-              </Button>
-              <p className="text-[10px] text-center text-muted-foreground mt-3">
-                El enlace de descarga es temporal y expira en 15 minutos.
-              </p>
+              {result.estado === "PENDIENTE_PAGO" && (
+                <div className="mt-6 pt-6 border-t border-border">
+                  <Button 
+                    variant="gold" 
+                    className="w-full"
+                    loading={payLoading === result.codigo}
+                    onClick={() => handlePagar(result.codigo)}
+                  >
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Ir a pagar arancel
+                  </Button>
+                </div>
+              )}
+
+              {result.downloadUrl && (
+                <div className="mt-6 pt-6 border-t border-border">
+                  <Button 
+                    variant="gold" 
+                    className="w-full"
+                    asChild
+                  >
+                    <a href={result.downloadUrl} target="_blank" rel="noopener noreferrer">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Descargar Certificado PDF
+                    </a>
+                  </Button>
+                  <p className="text-[10px] text-center text-muted-foreground mt-3">
+                    El enlace de descarga es temporal y expira en 15 minutos.
+                  </p>
+                </div>
+              )}
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>

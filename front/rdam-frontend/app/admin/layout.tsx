@@ -9,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["OPERARIO", "SUPERVISOR"] },
@@ -21,13 +22,36 @@ const NAV_ITEMS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { adminUser, adminRole, clearAdmin } = useAuthStore();
+  const { adminUser, adminToken, adminRole, clearAdmin } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !adminToken && !pathname.startsWith("/admin/login")) {
+      router.push("/admin/login");
+    }
+  }, [adminToken, mounted, pathname, router]);
 
   const handleLogout = () => {
     clearAdmin();
     toast.success("Sesión cerrada.");
     router.push("/admin/login");
   };
+
+  if (!mounted) {
+    return null; // prevent hydration mismatch
+  }
+
+  if (pathname.startsWith("/admin/login")) {
+    return <>{children}</>;
+  }
+
+  if (!adminToken) {
+    return null; // Do not render protected content while redirecting
+  }
 
   const visibleNav = NAV_ITEMS.filter(
     (item) => adminRole && item.roles.includes(adminRole)

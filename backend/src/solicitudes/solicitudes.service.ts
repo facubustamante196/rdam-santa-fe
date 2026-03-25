@@ -107,36 +107,43 @@ export class SolicitudesService {
             where.email = query.email;
         }
 
-        const solicitud = await this.solicitudesRepository.findOne({
+        const solicitudes = await this.solicitudesRepository.find({
             where,
             relations: { registrosAuditoria: true },
-            order: { registrosAuditoria: { timestamp: 'DESC' } },
+            order: { createdAt: 'DESC' },
         });
 
-        if (!solicitud) return null;
+        if (!solicitudes.length) return [];
 
-        let downloadUrl: string | undefined;
-        if (solicitud.estado === EstadoSolicitud.EMITIDA) {
-            try {
-                const res = await this.emisionService.generarUrlDescarga(solicitud.id);
-                downloadUrl = res.url;
-            } catch {
-                // Si falla la generación de la URL por alguna razón (ej. archivo borrado), 
-                // no bloqueamos el resto de la respuesta
-            }
-        }
+        return Promise.all(
+            solicitudes.map(async (solicitud) => {
+                let downloadUrl: string | undefined;
+                if (solicitud.estado === EstadoSolicitud.EMITIDA) {
+                    try {
+                        const res = await this.emisionService.generarUrlDescarga(solicitud.id);
+                        downloadUrl = res.url;
+                    } catch {
+                        // ignore error
+                    }
+                }
 
-        return {
-            id: solicitud.id,
-            codigo: solicitud.codigo,
-            estado: solicitud.estado,
-            downloadUrl,
-            timeline: solicitud.registrosAuditoria.map((reg) => ({
-                estado: reg.estadoNuevo || reg.accion.replace(/_/g, ' '),
-                fecha: reg.timestamp,
-                observacion: reg.observaciones,
-            })),
-        };
+                const sortedAuditoria = [...solicitud.registrosAuditoria].sort(
+                    (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+                );
+
+                return {
+                    id: solicitud.id,
+                    codigo: solicitud.codigo,
+                    estado: solicitud.estado,
+                    downloadUrl,
+                    timeline: sortedAuditoria.map((reg) => ({
+                        estado: reg.estadoNuevo || reg.accion.replace(/_/g, ' '),
+                        fecha: reg.timestamp,
+                        observacion: reg.observaciones,
+                    })),
+                };
+            })
+        );
     }
 
     async buscarPorDniHash(dniHash: string) {

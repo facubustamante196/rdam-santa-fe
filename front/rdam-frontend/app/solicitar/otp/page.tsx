@@ -35,6 +35,17 @@ export default function OtpPage() {
     return () => clearTimeout(t);
   }, [cooldown]);
 
+  // Route protection
+  useEffect(() => {
+    if (!dni || !email) {
+      router.replace("/solicitar");
+    }
+  }, [dni, email, router]);
+
+  if (!dni || !email) {
+    return null;
+  }
+
   const handleSubmit = async () => {
     if (otpValue.length !== 6) {
       setOtpError(true);

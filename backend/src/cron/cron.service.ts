@@ -1,17 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
-import { DataSource, LessThan, Repository } from 'typeorm';
+import { DataSource, LessThan, Repository, In } from 'typeorm';
 import { StateTransitionService } from '../common/services/state-transition.service';
-import { SolicitudEntity } from '../database/entities';
+import { SolicitudEntity, AuditoriaEntity } from '../database/entities';
 import { ActorTipo, EstadoSolicitud } from '../database/enums';
 
 @Injectable()
 export class CronService {
     private readonly logger = new Logger(CronService.name);
     private readonly solicitudesRepository: Repository<SolicitudEntity>;
+    private readonly auditoriaRepository: Repository<AuditoriaEntity>;
     private readonly diasPendientePago: number;
     private readonly diasCertificado: number;
+    private readonly aniosAnonimizacion: number;
 
     constructor(
         dataSource: DataSource,
@@ -19,9 +21,14 @@ export class CronService {
         private readonly stateTransition: StateTransitionService,
     ) {
         this.solicitudesRepository = dataSource.getRepository(SolicitudEntity);
+        this.auditoriaRepository = dataSource.getRepository(AuditoriaEntity);
         this.diasPendientePago = this.configService.get<number>(
             'CRON_DIAS_PENDIENTE_PAGO',
             60,
+        );
+        this.aniosAnonimizacion = this.configService.get<number>(
+            'CRON_ANIOS_ANONIMIZACION',
+            5,
         );
         this.diasCertificado = this.configService.get<number>(
             'CRON_DIAS_CERTIFICADO',
@@ -96,6 +103,51 @@ export class CronService {
 
         this.logger.log(
             `Cron vencimiento certificados: ${afectadas}/${solicitudes.length} procesadas`,
+        );
+    }
+
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    async anonimizarRegistrosAntiguos() {
+        this.logger.log('Cron: verificando solicitudes antiguas para anonimización (Ley de Privacidad)');
+
+        const fechaLimite = new Date();
+        fechaLimite.setFullYear(fechaLimite.getFullYear() - this.aniosAnonimizacion);
+
+        const solicitudes = await this.solicitudesRepository.find({
+            where: {
+                estado: In([EstadoSolicitud.VENCIDO, EstadoSolicitud.PUBLICADO_VENCIDO, EstadoSolicitud.RECHAZADA]),
+                updatedAt: LessThan(fechaLimite),
+            },
+            select: { id: true, codigo: true },
+        });
+
+        if (solicitudes.length === 0) {
+            this.logger.log('Cron anonimización: No hay solicitudes para procesar.');
+            return;
+        }
+
+        let afectadas = 0;
+        for (const solicitud of solicitudes) {
+            try {
+                // Borrar logs de auditoría para no dejar rastros de las personas ni metadatos sensibles
+                await this.auditoriaRepository.delete({ solicitudId: solicitud.id });
+
+                // Scrub / Anonimizar datos de la solicitud
+                await this.solicitudesRepository.update(solicitud.id, {
+                    nombreCompleto: 'ANONIMIZADO_LPD',
+                    email: 'anonimizado@rdam.local',
+                    dniEncriptado: 'ANONIMIZADO',
+                    cuilEncriptado: 'ANONIMIZADO',
+                });
+                
+                afectadas++;
+            } catch (error) {
+                this.logger.error(`Error al anonimizar solicitud ${solicitud.codigo}: ${error}`);
+            }
+        }
+
+        this.logger.log(
+            `Cron anonimización completado: ${afectadas}/${solicitudes.length} solicitudes anonimizadas`,
         );
     }
 }

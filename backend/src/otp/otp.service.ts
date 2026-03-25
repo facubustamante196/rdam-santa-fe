@@ -2,6 +2,8 @@ import {
     Injectable,
     BadRequestException,
     GoneException,
+    HttpException,
+    HttpStatus,
     Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -78,9 +80,16 @@ export class OtpService {
         captchaToken?: string,
         remoteIp?: string,
     ) {
+        const dniHash = this.encryptionService.blindIndex(dni);
+        const blockKey = `otp_blocked:${dniHash}`;
+
+        const isBlocked = await this.redis.get(blockKey);
+        if (isBlocked) {
+            throw new HttpException('Has sido bloqueado temporalmente por demasiados intentos fallidos. Intenta nuevamente más tarde.', HttpStatus.TOO_MANY_REQUESTS);
+        }
+
         await this.validarCaptcha(captchaToken, remoteIp);
 
-        const dniHash = this.encryptionService.blindIndex(dni);
         const redisKey = `otp:${dniHash}`;
 
         // Generar código de 6 dígitos
@@ -117,6 +126,13 @@ export class OtpService {
      */
     async validar(dni: string, email: string, codigo: string) {
         const dniHash = this.encryptionService.blindIndex(dni);
+        const blockKey = `otp_blocked:${dniHash}`;
+
+        const isBlocked = await this.redis.get(blockKey);
+        if (isBlocked) {
+            throw new HttpException('Has sido bloqueado temporalmente por demasiados intentos fallidos. Intenta nuevamente más tarde.', HttpStatus.TOO_MANY_REQUESTS);
+        }
+
         const redisKey = `otp:${dniHash}`;
 
         const stored = await this.redis.get(redisKey);
@@ -134,20 +150,25 @@ export class OtpService {
             throw new BadRequestException('Email no coincide con el OTP solicitado');
         }
 
-        // Verificar intentos
-        if (otpData.intentos >= this.maxIntentos) {
-            await this.redis.del(redisKey);
-            throw new GoneException(
-                'Máximo de intentos alcanzado. Solicite un nuevo código OTP.',
-            );
-        }
-
         // Verificar código
         const codigoHash = this.encryptionService.hashOtp(codigo);
+        
+        // Configuración de bloqueo: 5 intentos son suficientes para asumir fuerza bruta.
+        const intentosPermitidos = 5;
 
         if (codigoHash !== otpData.otpHash) {
             // Incrementar intentos
             otpData.intentos += 1;
+            
+            if (otpData.intentos >= intentosPermitidos) {
+                await this.redis.set(blockKey, '1', 'EX', 900); // 15 minutos de bloqueo
+                await this.redis.del(redisKey);
+                throw new HttpException(
+                    'Demasiados intentos fallidos. Se ha bloqueado la generación de códigos por 15 minutos por seguridad.',
+                    HttpStatus.TOO_MANY_REQUESTS,
+                );
+            }
+
             const ttlRestante = await this.redis.ttl(redisKey);
             await this.redis.set(
                 redisKey,
@@ -156,7 +177,7 @@ export class OtpService {
                 ttlRestante > 0 ? ttlRestante : this.otpTtl,
             );
 
-            const restantes = this.maxIntentos - otpData.intentos;
+            const restantes = intentosPermitidos - otpData.intentos;
             throw new BadRequestException(
                 `Código OTP incorrecto. Le quedan ${restantes} intento(s).`,
             );

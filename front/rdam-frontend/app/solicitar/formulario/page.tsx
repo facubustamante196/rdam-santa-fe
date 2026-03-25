@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,16 @@ export default function FormularioPage() {
   const { citizenToken } = useAuthStore();
   const token = citizenToken ?? otpToken ?? "";
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      router.replace("/solicitar");
+    }
+  }, [token, router]);
+
+  if (!token) {
+    return null;
+  }
 
   const {
     register,

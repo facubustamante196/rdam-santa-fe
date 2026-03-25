@@ -151,10 +151,10 @@ export class AdminService {
 
     async crearUsuario(dto: CrearUsuarioDto) {
         const existente = await this.usuariosRepository.findOne({
-            where: { username: dto.username },
+            where: { username: ILike(dto.username) },
         });
         if (existente) {
-            throw new ConflictException('El nombre de usuario ya existe');
+            throw new ConflictException(`El nombre de usuario '${dto.username}' ya está en uso.`);
         }
 
         const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -308,7 +308,17 @@ export class AdminService {
 
         if (dto.nombreCompleto !== undefined) usuario.nombreCompleto = dto.nombreCompleto;
         else if ((dto as any).nombre !== undefined) usuario.nombreCompleto = (dto as any).nombre;
-        if (dto.username !== undefined) usuario.username = dto.username;
+        
+        if (dto.username !== undefined && dto.username !== usuario.username) {
+            const existente = await this.usuariosRepository.findOne({
+                where: { username: ILike(dto.username) },
+            });
+            if (existente) {
+                throw new ConflictException(`El nombre de usuario '${dto.username}' ya está en uso.`);
+            }
+            usuario.username = dto.username;
+        }
+
         if (dto.rol !== undefined) usuario.rol = dto.rol;
         if (dto.circunscripcion !== undefined) usuario.circunscripcion = dto.circunscripcion;
         if (dto.activo !== undefined) usuario.activo = dto.activo;

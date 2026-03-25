@@ -28,6 +28,13 @@ async function request<T>(
   const res = await fetch(`${BASE_URL}${path}`, { ...init, headers });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      if (typeof window !== "undefined") {
+        const { useAuthStore } = await import("@/lib/stores/auth.store");
+        useAuthStore.getState().clearAdmin();
+        window.location.href = "/admin/login";
+      }
+    }
     const body = await res.json().catch(() => null);
     throw new ApiError(res.status, `HTTP ${res.status}`, body);
   }
@@ -174,7 +181,7 @@ export const api = {
           Object.entries(params).filter(([, v]) => !!v) as [string, string][]
         )
       );
-      return request<ConsultaResponse>(`/solicitudes/consulta?${query}`);
+      return request<ConsultaResponse[]>(`/solicitudes/consulta?${query}`);
     },
 
     historial: (token: string) =>

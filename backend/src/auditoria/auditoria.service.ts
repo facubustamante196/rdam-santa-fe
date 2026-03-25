@@ -58,6 +58,9 @@ export class AuditoriaService {
     }) {
         const qb = this.auditoriaRepository.createQueryBuilder('a')
             .leftJoinAndSelect('a.usuario', 'usuario')
+            .where('a.actorTipo IN (:...tipos)', { 
+                tipos: [ActorTipo.OPERARIO, ActorTipo.SUPERVISOR] 
+            })
             .orderBy('a.timestamp', 'DESC');
 
         if (params.solicitudId) {

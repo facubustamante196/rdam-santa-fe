@@ -65,6 +65,11 @@ services:
       - S3_PUBLIC_ENDPOINT=http://localhost:9000
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_KEY=minioadmin
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      - EMAIL_USER=tu-email-aca@gmail.com
+      - EMAIL_PASS=contraseña-de-aplicacion-aca
+      - EMAIL_FROM=Ministerio de Justicia <noreply@santafe.gov.ar>
       - OTP_JWT_SECRET=cambiar-otp-secret-min-32-caracteres
       - S3_BUCKET=rdam-documents
       - JWT_SECRET=supersecret-dev-key-12345

@@ -14,13 +14,13 @@ import { useSolicitudStore } from "@/lib/stores/solicitud.store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
-import { RecaptchaMock } from "@/components/shared/recaptcha-mock";
+import ReCAPTCHA from "react-google-recaptcha";
 import { SolicitudProgress } from "@/components/citizen/solicitud-progress";
 
 export default function SolicitarPage() {
   const router = useRouter();
   const { setCredentials, goToStep } = useSolicitudStore();
-  const [captchaOk, setCaptchaOk] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const {
@@ -33,17 +33,16 @@ export default function SolicitarPage() {
   });
 
   const onSubmit = async (data: OtpSolicitarInput) => {
-    if (!captchaOk) {
+    if (!captchaToken) {
       toast.error("Completá el captcha antes de continuar.");
       return;
     }
     setLoading(true);
     try {
-      // Pass a dummy token since it's disabled in backend .env but required by flow
       const res = await api.auth.solicitarOtp({ 
         dni: data.dni, 
         email: data.email,
-        captchaToken: "mock-token-verification-v2-length-satisfied"
+        captchaToken,
       });
       
       setCredentials(data.dni, data.email);
@@ -118,7 +117,12 @@ export default function SolicitarPage() {
             </div>
           </FormField>
 
-          <RecaptchaMock verified={captchaOk} onVerify={() => setCaptchaOk(true)} />
+          <div className="flex justify-center">
+            <ReCAPTCHA
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+              onChange={(token) => setCaptchaToken(token)}
+            />
+          </div>
 
           <Button
             type="submit"

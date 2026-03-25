@@ -179,8 +179,10 @@ export class EmailService {
     private async enviar(options: EmailOptions) {
         try {
             const isDev = this.configService.get('NODE_ENV') === 'development';
+            const emailHost = this.configService.get('EMAIL_HOST');
 
-            if (isDev) {
+            // Si está en desarrollo Y NO configuró un servidor SMTP, simulamos el envío.
+            if (isDev && (!emailHost || emailHost === 'smtp.example.com')) {
                 this.logger.log(
                     `📧 [DEV] Email a ${options.to}: "${options.subject}"`,
                 );

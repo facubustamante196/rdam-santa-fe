@@ -39,12 +39,12 @@ export class SolicitudesController {
             throw new BadRequestException('Debe proporcionar el código o el DNI y Email');
         }
 
-        const resultado = await this.solicitudesService.consultar(query);
-        if (!resultado) {
-            throw new NotFoundException('No se encontró la solicitud');
+        const resultados = await this.solicitudesService.consultar(query);
+        if (!resultados || resultados.length === 0) {
+            throw new NotFoundException('No se encontraron solicitudes');
         }
 
-        return resultado;
+        return resultados;
     }
 
     /**

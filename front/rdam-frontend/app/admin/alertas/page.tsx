@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { AlertTriangle, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,19 +34,30 @@ const NIVEL_COLORS: Record<string, string> = {
 };
 
 export default function AlertasPage() {
-  const { adminToken } = useAuthStore();
+  const router = useRouter();
+  const { adminToken, adminRole } = useAuthStore();
   const [alertas, setAlertas] = useState<AlertaSLA[]>(MOCK_ALERTAS);
   const [filtroNivel, setFiltroNivel] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (adminRole && adminRole !== "SUPERVISOR") {
+      toast.error("Acceso denegado: Se requieren permisos de supervisor.");
+      router.replace("/admin/dashboard");
+      return;
+    }
+    
     if (!adminToken) return;
     setLoading(true);
     api.admin.solicitudes.alertas({}, adminToken)
       .then(setAlertas)
       .catch(() => setAlertas(MOCK_ALERTAS))
       .finally(() => setLoading(false));
-  }, [adminToken]);
+  }, [adminToken, adminRole, router]);
+
+  if (adminRole !== "SUPERVISOR") {
+    return null;
+  }
 
   const filtered = alertas.filter((a) => !filtroNivel || a.nivel === filtroNivel);
 

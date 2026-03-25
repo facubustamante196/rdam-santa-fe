@@ -34,6 +34,8 @@ export default function SolicitudesAdminPage() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [estado, setEstado] = useState("");
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
   
   // Set initial circumscription based on user role and assigned city
   const [circ, setCirc] = useState(() => {
@@ -60,6 +62,8 @@ export default function SolicitudesAdminPage() {
           estado: estado || undefined, 
           circunscripcion: CIRC_ID_TO_ENUM[circ] || undefined, 
           search: search || undefined,
+          desde: desde || undefined,
+          hasta: hasta || undefined,
           page, 
           limit 
         },
@@ -84,7 +88,7 @@ export default function SolicitudesAdminPage() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [estado, circ, search]);
+  }, [estado, circ, search, desde, hasta]);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -111,6 +115,24 @@ export default function SolicitudesAdminPage() {
             <option key={e.value} value={e.value}>{e.label}</option>
           ))}
         </select>
+
+        <div className="flex items-center gap-2">
+          <Input 
+            type="date" 
+            value={desde} 
+            onChange={e => setDesde(e.target.value)}
+            className="w-36 bg-white"
+            title="Desde (Fecha)"
+          />
+          <span className="text-muted-foreground text-sm">-</span>
+          <Input 
+            type="date" 
+            value={hasta} 
+            onChange={e => setHasta(e.target.value)}
+            className="w-36 bg-white"
+            title="Hasta (Fecha)"
+          />
+        </div>
 
         <select
           value={circ}

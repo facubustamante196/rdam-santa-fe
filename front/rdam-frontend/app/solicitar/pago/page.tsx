@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CreditCard, CheckCircle2, ExternalLink, Download, Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -11,8 +12,20 @@ import { Button } from "@/components/ui/button";
 import { SolicitudProgress } from "@/components/citizen/solicitud-progress";
 
 export default function PagoPage() {
+  const router = useRouter();
   const { solicitudCodigo, solicitudId, urlPago, goToStep, step } = useSolicitudStore();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!solicitudCodigo && step !== "done") {
+      router.replace("/solicitar");
+    }
+  }, [solicitudCodigo, step, router]);
+
+  // Si no está el código y no ha terminado, no renderiza para no mostrar el pago vacío
+  if (!solicitudCodigo && step !== "done") {
+    return null;
+  }
 
   const handlePagar = async () => {
     if (!solicitudCodigo) return;
